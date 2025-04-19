@@ -1,0 +1,35 @@
+{
+  "steps": [
+    {
+      "name": "gcr.io/cloud-builders/docker",
+      "args": [
+        "build",
+        "-t",
+        "gcr.io/genuine-vent-457105-i4/insurance-api-stg",
+        "."
+      ]
+    },
+    {
+      "name": "gcr.io/cloud-builders/docker",
+      "args": ["push", "gcr.io/genuine-vent-457105-i4/insurance-api-stg"]
+    },
+    {
+      "name": "gcr.io/cloud-builders/gcloud",
+      "entrypoint": "gcloud",
+      "args": [
+        "run",
+        "deploy",
+        "insurance-api-stg",
+        "--image",
+        "gcr.io/genuine-vent-457105-i4/insurance-api-stg",
+        "--region",
+        "asia-southeast1",
+        "--platform",
+        "managed",
+        "--allow-unauthenticated"
+      ]
+    }
+  ],
+  "options": { "logging": "CLOUD_LOGGING_ONLY" },
+  "images": ["gcr.io/genuine-vent-457105-i4/insurance-api-stg"]
+}
