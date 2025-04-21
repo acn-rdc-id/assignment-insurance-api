@@ -33,6 +33,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable()) // Disable CSRF for stateless APIs
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll() // Permit Swagger endpoints
                         .requestMatchers("/").permitAll()
                         .requestMatchers("/api").permitAll()
                         .requestMatchers("/api/auth/**").permitAll() // Public endpoints for signup/login
