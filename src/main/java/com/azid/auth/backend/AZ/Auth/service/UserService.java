@@ -1,8 +1,5 @@
 package com.azid.auth.backend.AZ.Auth.service;
 
-
-
-
 import com.azid.auth.backend.AZ.Auth.model.User;
 import com.azid.auth.backend.AZ.Auth.repository.UserRepository;
 import org.slf4j.Logger;
@@ -11,6 +8,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -32,6 +31,7 @@ public class UserService {
 
         // Encode the password before saving
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setUserId(UUID.randomUUID().toString());
         User savedUser = userRepository.save(user);
 
         // Query and log the user from the database

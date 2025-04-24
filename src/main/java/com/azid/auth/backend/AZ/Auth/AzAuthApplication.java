@@ -9,7 +9,5 @@ public class AzAuthApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(AzAuthApplication.class, args);
 
-
-
 	}
 }
