@@ -32,7 +32,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable()) // Disable CSRF for stateless APIs
-                .authorizeHttpRequests(auth -> auth
+                .cors(cors -> cors.configure(http))
+                    .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll() // Permit Swagger endpoints
                         .requestMatchers("/").permitAll()
                         .requestMatchers("/api").permitAll()
@@ -42,9 +43,9 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Stateless session
                 .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class); // Add JWT filter
-                                                                                                      // before
-                                                                                                      // username-password
-                                                                                                      // filter
+        // before
+        // username-password
+        // filter
 
         return http.build();
     }
