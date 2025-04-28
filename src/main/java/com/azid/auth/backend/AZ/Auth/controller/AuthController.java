@@ -49,6 +49,6 @@ public class AuthController {
         User user = userRepository.findByEmail(authRequest.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + authRequest.getEmail()));
 
-        return ResponseEntity.ok(new AuthResponse(jwtToken, user.getEmail(), user.getPassword()));
+        return ResponseEntity.ok(new AuthResponse(jwtToken, user.getEmail(), user.getUsername()));
     }
 }
