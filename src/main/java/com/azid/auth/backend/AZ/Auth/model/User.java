@@ -1,6 +1,7 @@
 package com.azid.auth.backend.AZ.Auth.model;
 
 import java.util.UUID;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -21,6 +22,17 @@ public class User {
     private String password;
 
     private String role; // e.g., ROLE_USER
+
+    private String idType; // Identification type, e.g., NRIC
+
+    @Column(unique = true, nullable = false)
+    private String idNo; // Identification number, e.g., "101010-12-3456"
+
+    private String mobileNoPrefix; // Mobile number prefix, e.g., "60"
+
+    @Column(nullable = false)
+    private String mobileNo; // Mobile number, e.g., "123456789"
+
 
     // Constructor for generating userId
     public User() {
@@ -73,5 +85,37 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getIdNo() {
+        return idNo;
+    }
+
+    public void setIdNo(String idNo) {
+        this.idNo = idNo;
+    }
+
+    public String getIdType() {
+        return idType;
+    }
+
+    public void setIdType(String idType) {
+        this.idType = idType;
+    }
+
+    public String getMobileNoPrefix() {
+        return mobileNoPrefix;
+    }
+
+    public void setMobileNoPrefix(String mobileNoPrefix) {
+        this.mobileNoPrefix = mobileNoPrefix;
+    }
+
+    public String getMobileNo() {
+        return mobileNo;
+    }
+
+    public void setMobileNo(String mobileNo) {
+        this.mobileNo = mobileNo;
     }
 }
