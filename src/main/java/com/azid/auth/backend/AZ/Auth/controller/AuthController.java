@@ -84,7 +84,8 @@ public class AuthController {
        String jwtToken = jwtUtils.generateJwtToken(userDetails);
 
        // Ensure all necessary data is available before proceeding
-       logger.info("Printing out for debug jwt" +jwtToken," userid"+user.getUserId()," email"+ user.getEmail()," username"+user.getUsername());
+       logger.info("Printing out for debug jwt: {}, userid: {}, email: {}, username: {}",
+               jwtToken, user.getUserId(), user.getEmail(), user.getUsername());
        if (jwtToken == null || user.getEmail() == null || user.getUsername() == null || user.getUserId() == null) {
            throw new IllegalStateException("Unable to generate response due to missing user information.");
        }
