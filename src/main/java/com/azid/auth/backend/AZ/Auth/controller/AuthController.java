@@ -1,6 +1,7 @@
 package com.azid.auth.backend.AZ.Auth.controller;
 
 import com.azid.auth.backend.AZ.Auth.dtos.ApiResponseDto;
+import com.azid.auth.backend.AZ.Auth.exceptions.BadRequestException;
 import com.azid.auth.backend.AZ.Auth.exceptions.ForbiddenException;
 import com.azid.auth.backend.AZ.Auth.model.AuthRequest;
 import com.azid.auth.backend.AZ.Auth.model.User;
@@ -44,7 +45,7 @@ public class AuthController {
         return ResponseEntity.ok(new ApiResponseDto<Map<String, Object>>("Success", HttpStatus.OK.value(), "User registered successfully!", Collections.emptyMap()));
     }
 
-    @PostMapping("/login")
+   /* @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody AuthRequest authRequest) {
         User user = userRepository.findByEmail(authRequest.getEmail())
                 .orElseThrow(() -> new ForbiddenException("User not found with email: " + authRequest.getEmail()));
@@ -56,5 +57,43 @@ public class AuthController {
         String jwtToken = jwtUtils.generateJwtToken(userDetails);
 
         return ResponseEntity.ok(new ApiResponseDto<Map<String, Object>>("Success", HttpStatus.OK.value(), "User logged in Successfully!", Map.of("token", jwtToken, "email", user.getEmail(), "username", user.getUsername(), "userId", user.getUserId())));
-    }
+    }*/
+   @PostMapping("/login")
+   public ResponseEntity<?> loginUser(@RequestBody AuthRequest authRequest) {
+       // Validate incoming request
+       if (authRequest.getEmail() == null || authRequest.getEmail().isBlank() || authRequest.getPassword() == null || authRequest.getPassword().isBlank()) {
+           throw new BadRequestException("Email and password must not be empty.");
+       }
+
+       // Fetch user from the repository
+       User user = userRepository.findByEmail(authRequest.getEmail())
+               .orElseThrow(() -> new ForbiddenException("User not found with email: " + authRequest.getEmail()));
+
+       // Authenticate user credentials
+       Authentication authentication = authenticationManager.authenticate(
+               new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword()));
+
+       // Get user details from authentication principal
+       UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+       // Generate JWT token
+       String jwtToken = jwtUtils.generateJwtToken(userDetails);
+
+       // Ensure all necessary data is available before proceeding
+       if (jwtToken == null || user.getEmail() == null || user.getUsername() == null || user.getUserId() == null) {
+           throw new IllegalStateException("Unable to generate response due to missing user information.");
+       }
+
+       // Build response data
+       Map<String, Object> responseData = Map.of(
+               "token", jwtToken,
+               "email", user.getEmail(),
+               "username", user.getUsername(),
+               "userId", user.getUserId()
+       );
+
+       // Return success response
+       return ResponseEntity.ok(new ApiResponseDto<>("Success", HttpStatus.OK.value(), "User logged in successfully!", responseData));
+   }
+
 }
