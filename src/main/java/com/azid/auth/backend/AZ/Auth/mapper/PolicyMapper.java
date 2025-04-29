@@ -9,5 +9,5 @@ import org.mapstruct.Mapper;
 public interface PolicyMapper {
 
     Policy toEntity(PolicyDto dto);
-    PolicyResponseDto toDto(Policy policy);
+    PolicyDto toDto(Policy policy);
 }

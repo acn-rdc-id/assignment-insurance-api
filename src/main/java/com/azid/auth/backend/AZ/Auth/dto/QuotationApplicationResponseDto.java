@@ -13,7 +13,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Data
 @Builder
-public class QuotationDeclarationResponseDto {
+public class QuotationApplicationResponseDto {
 
     @JsonIgnoreProperties
     private Long id;
@@ -25,10 +25,15 @@ public class QuotationDeclarationResponseDto {
     private String countryOfBirth;
     private String phoneNo;
     private String email;
+    @JsonIgnoreProperties
     private Date dateOfBirth;
+    @JsonIgnoreProperties
     private boolean isSmoker;
+    @JsonIgnoreProperties
     private Integer cigarettesNo;
+    @JsonIgnoreProperties
     private String occupation;
+    @JsonIgnoreProperties
     private String purposeOfTransaction;
     private Date paymentDate;
     private BigDecimal paymentAmount;
