@@ -1,33 +1,49 @@
 package com.azid.auth.backend.AZ.Auth.service;
 
-import com.azid.auth.backend.AZ.Auth.dto.PaymentDto;
-import com.azid.auth.backend.AZ.Auth.dto.PolicyDto;
-import com.azid.auth.backend.AZ.Auth.dto.PolicyResponseDto;
-import com.azid.auth.backend.AZ.Auth.dto.QuotationApplicationDto;
+import com.azid.auth.backend.AZ.Auth.dto.*;
 import com.azid.auth.backend.AZ.Auth.mapper.PaymentMapper;
 import com.azid.auth.backend.AZ.Auth.mapper.PolicyMapper;
+import com.azid.auth.backend.AZ.Auth.mapper.QuotationApplicationMapper;
 import com.azid.auth.backend.AZ.Auth.model.Payment;
-import com.azid.auth.backend.AZ.Auth.model.Policy;
+import com.azid.auth.backend.AZ.Auth.model.QuotationApplication;
 import com.azid.auth.backend.AZ.Auth.repository.PaymentRepository;
 import com.azid.auth.backend.AZ.Auth.repository.PolicyRepository;
+import com.azid.auth.backend.AZ.Auth.repository.QuotationApplicationRepository;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.Date;
+
 @Service
-@AllArgsConstructor
-@NoArgsConstructor
 public class PolicyService {
 
-    private static PolicyRepository policyRepository;
-    private static PaymentRepository paymentRepository;
-    @Autowired
-    private static PolicyMapper policyMapper;
-    @Autowired
-    private static PaymentMapper paymentMapper;
+    private final PolicyRepository policyRepository;
+    private final PaymentRepository paymentRepository;
+    private final QuotationApplicationRepository quotationApplicationRepository;
+    private final PolicyMapper policyMapper;
+    private final PaymentMapper paymentMapper;
+    private final QuotationApplicationMapper quotationApplicationMapper;
 
-    //public PolicyResponseDto createPolicy(QuotationApplicationDto dto){
+    public PolicyService(
+            PolicyRepository policyRepository,
+            PaymentRepository paymentRepository,
+            QuotationApplicationRepository quotationApplicationRepository,
+            PolicyMapper policyMapper,
+            PaymentMapper paymentMapper,
+            QuotationApplicationMapper quotationApplicationMapper) {
+
+        this.policyRepository = policyRepository;
+        this.paymentRepository = paymentRepository;
+        this.quotationApplicationRepository = quotationApplicationRepository;
+        this.policyMapper = policyMapper;
+        this.paymentMapper = paymentMapper;
+        this.quotationApplicationMapper = quotationApplicationMapper;
+    }
+
+    public QuotationApplicationResponseDto createPolicy(QuotationApplicationDto dto){
 
 
             //fe hantar status success/fail
@@ -43,17 +59,23 @@ public class PolicyService {
            //so we wont create policy
         // updfate payment failed
 
+        QuotationApplication quotationApplication = quotationApplicationMapper.toEntity(dto);
+        QuotationApplication savedQuote = quotationApplicationRepository.save(quotationApplication);
+        QuotationApplicationDto quotationApplicationDto = quotationApplicationMapper.toDto(savedQuote);
 
-
-      /*  PaymentDto paymentDto = dto.getPaymentDto();
+        PaymentDto paymentDto = new PaymentDto();
+        paymentDto.setPaymentAmount(dto.getPaymentAmount());
+        paymentDto.setPaymentDate(new Date());
+        paymentDto.setPaymentStatus(dto.getPaymentStatus());
+        paymentDto.setDuration(dto.getPaymentDuration());
         Payment payment =  paymentMapper.toEntity(paymentDto);
-        paymentRepository.save(payment);*/
+        Payment savedPayment = paymentRepository.save(payment);
+        PaymentDto paymentResponseDto = paymentMapper.toDto(savedPayment);
 
-
-
-
-
-          // return ;
-   // }
+        QuotationApplicationResponseDto quotationApplicationResponseDto = new QuotationApplicationResponseDto();
+        quotationApplicationResponseDto.setPaymentStatus(paymentResponseDto.getPaymentStatus());
+        quotationApplicationResponseDto.setFullName(quotationApplicationDto.getFullName());
+        return quotationApplicationResponseDto;
+    }
 
 }

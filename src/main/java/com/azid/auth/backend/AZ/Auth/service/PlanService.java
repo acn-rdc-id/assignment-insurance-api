@@ -3,6 +3,7 @@ package com.azid.auth.backend.AZ.Auth.service;
 import com.azid.auth.backend.AZ.Auth.dto.PlanDetailsDto;
 import com.azid.auth.backend.AZ.Auth.dto.PlanRequestDto;
 import com.azid.auth.backend.AZ.Auth.dto.PlanResponseDto;
+import com.azid.auth.backend.AZ.Auth.mapper.PlanMapper;
 import com.azid.auth.backend.AZ.Auth.model.Plan;
 import com.azid.auth.backend.AZ.Auth.model.RuleSet;
 import com.azid.auth.backend.AZ.Auth.repository.PlanRepository;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,12 +25,21 @@ public class PlanService {
     @Autowired
     private PlanRepository planRepository;
 
+    @Autowired
+    private PlanMapper planMapper;
+
     public PlanResponseDto generatePlan(PlanRequestDto request) {
         LocalDate dob = request.getDateOfBirth();
         LocalDate today = LocalDate.now();
 
         // TODO: add validation for gender request
-        String gender = request.getGender().equalsIgnoreCase("male") ? "M" : "F";
+        //String gender = request.getGender().equalsIgnoreCase("male") ? "M" : "F";
+
+        String genderInput = request.getGender();
+        if (genderInput == null || (!genderInput.equalsIgnoreCase("male") && !genderInput.equalsIgnoreCase("female"))) {
+            throw new IllegalArgumentException("Invalid gender. Please provide 'male' or 'female'.");
+        }
+        String gender = genderInput.equalsIgnoreCase("male") ? "M" : "F";
 
         int age = Period.between(dob, today).getYears();
         if (today.getDayOfYear() < dob.withYear(today.getYear()).getDayOfYear()) {
@@ -57,15 +68,13 @@ public class PlanService {
         PlanResponseDto response = new PlanResponseDto();
         response.setReferenceNumber(generateReferenceNumber());
         response.setGender(request.getGender());
-        // TODO: set date format to dd/MM/yyyy
-        response.setDateOfBirth(request.getDateOfBirth().toString());
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        response.setDateOfBirth(dob.format(dateFormatter));
         response.setAgeNearestBirthday(age);
         response.setPlans(planDetails);
 
-
         return response;
     }
-
 
     public Double findPremium(Long planId, String gender, String frequency, int age) {
         return ruleSetRepository

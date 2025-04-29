@@ -1,5 +1,8 @@
 package com.azid.auth.backend.AZ.Auth.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,6 +17,8 @@ import java.util.Date;
 @Builder
 public class QuotationApplicationDto {
 
+    @JsonIgnoreProperties(value = {"id"})
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
     private String fullName;
