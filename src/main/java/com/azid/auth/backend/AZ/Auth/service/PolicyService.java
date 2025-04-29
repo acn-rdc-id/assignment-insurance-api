@@ -5,6 +5,7 @@ import com.azid.auth.backend.AZ.Auth.mapper.PaymentMapper;
 import com.azid.auth.backend.AZ.Auth.mapper.PolicyMapper;
 import com.azid.auth.backend.AZ.Auth.mapper.QuotationApplicationMapper;
 import com.azid.auth.backend.AZ.Auth.model.Payment;
+import com.azid.auth.backend.AZ.Auth.model.Policy;
 import com.azid.auth.backend.AZ.Auth.model.QuotationApplication;
 import com.azid.auth.backend.AZ.Auth.repository.PaymentRepository;
 import com.azid.auth.backend.AZ.Auth.repository.PolicyRepository;
@@ -26,6 +27,12 @@ public class PolicyService {
     private final PolicyMapper policyMapper;
     private final PaymentMapper paymentMapper;
     private final QuotationApplicationMapper quotationApplicationMapper;
+
+    public PolicyDto getPolicyById(Long id) {
+        Policy policy = policyRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Policy not found with id: " + id));
+        return policyMapper.toDto(policy);
+    }
 
     public PolicyService(
             PolicyRepository policyRepository,
