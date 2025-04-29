@@ -3,7 +3,7 @@ spring:
     name: Allianz Demo Application
   datasource:
     hikari:
-      jdbc-url: dbsvr01.semicolon-my.com
+      jdbc-url: jdbc:mysql://dbsvr01.semicolon-my.com/acn_az_rdc_id?autoReconnect=true
       username: webapp_rdc
       password: RDCallianz@12345
       driver-class-name: com.mysql.cj.jdbc.Driver
