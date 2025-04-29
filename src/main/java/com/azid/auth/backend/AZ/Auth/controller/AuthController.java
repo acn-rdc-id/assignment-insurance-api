@@ -6,8 +6,11 @@ import com.azid.auth.backend.AZ.Auth.exceptions.ForbiddenException;
 import com.azid.auth.backend.AZ.Auth.model.AuthRequest;
 import com.azid.auth.backend.AZ.Auth.model.User;
 import com.azid.auth.backend.AZ.Auth.repository.UserRepository;
+import com.azid.auth.backend.AZ.Auth.security.SecurityConfig;
 import com.azid.auth.backend.AZ.Auth.service.UserService;
 import com.azid.auth.backend.AZ.Auth.utils.JwtUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,6 +28,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
@@ -80,6 +84,7 @@ public class AuthController {
        String jwtToken = jwtUtils.generateJwtToken(userDetails);
 
        // Ensure all necessary data is available before proceeding
+       logger.info("Printing out for debug jwt" +jwtToken," userid"+user.getUserId()," email"+ user.getEmail()," username"+user.getUsername());
        if (jwtToken == null || user.getEmail() == null || user.getUsername() == null || user.getUserId() == null) {
            throw new IllegalStateException("Unable to generate response due to missing user information.");
        }
