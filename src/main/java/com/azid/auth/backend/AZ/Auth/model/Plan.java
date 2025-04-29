@@ -5,10 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,19 +21,13 @@ public class Plan {
     private String planName;
 
     @Column(name = "coverage_amount")
-    private BigDecimal coverageAmount;
+    private Double coverageAmount;
 
     @Column(name = "base_premium")
-    private BigDecimal basePremium;
+    private Double basePremium;
 
     @Column(name = "duration")
     private Integer duration;
-
-    @OneToMany(mappedBy = "plan")
-    private List<Policy> policyList;
-
-    @OneToMany(mappedBy = "plan")
-    private List<RuleSet> ruleSetList;
 
     @Column(name = "status")
     private String status;

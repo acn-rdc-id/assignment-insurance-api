@@ -37,13 +37,15 @@ public class RuleSet {
     private Integer coverageAmount;
 
     @Column(name = "premium_amount")
-    private BigDecimal premiumAmount;
+    private Double premiumAmount;
 
     @Column(name = "gender")
     private String gender;
 
+    @Column(name = "payment_frequency")
+    private String paymentFrequency;
+
     @Column(name = "status")
     private String status;
-
 
 }
