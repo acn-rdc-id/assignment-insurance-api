@@ -48,20 +48,6 @@ public class AuthController {
 
         return ResponseEntity.ok(new ApiResponseDto<Map<String, Object>>("Success", HttpStatus.OK.value(), "User registered successfully!", Collections.emptyMap()));
     }
-
-   /* @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody AuthRequest authRequest) {
-        User user = userRepository.findByEmail(authRequest.getEmail())
-                .orElseThrow(() -> new ForbiddenException("User not found with email: " + authRequest.getEmail()));
-
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword()));
-
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String jwtToken = jwtUtils.generateJwtToken(userDetails);
-
-        return ResponseEntity.ok(new ApiResponseDto<Map<String, Object>>("Success", HttpStatus.OK.value(), "User logged in Successfully!", Map.of("token", jwtToken, "email", user.getEmail(), "username", user.getUsername(), "userId", user.getUserId())));
-    }*/
    @PostMapping("/login")
    public ResponseEntity<?> loginUser(@RequestBody AuthRequest authRequest) {
        // Validate incoming request
