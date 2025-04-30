@@ -10,7 +10,6 @@ import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-
         private static final Map<Class<? extends Exception>, HttpStatus> EXCEPTION_STATUS_MAP = Map.of(
                 ForbiddenException.class, HttpStatus.FORBIDDEN,
                 ResourceNotFoundException.class, HttpStatus.NOT_FOUND,
@@ -18,7 +17,7 @@ public class GlobalExceptionHandler {
         );
 
         @ExceptionHandler(Exception.class)
-        public ResponseEntity<ErrorResponse<Object>> handleException(Exception ex) {
+        public ResponseEntity<ErrorResponse<?>> handleException(Exception ex) {
             HttpStatusCode status = EXCEPTION_STATUS_MAP.getOrDefault(ex.getClass(), HttpStatus.INTERNAL_SERVER_ERROR);
 
             ErrorResponse<Object> errorResponse = new ErrorResponse<>(
