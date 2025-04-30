@@ -26,6 +26,4 @@ public class PlanController {
         PlanResponseDto responseDto = planService.generatePlan(requestDto);
         return ResponseEntity.ok(responseDto);
     }
-
-
 }

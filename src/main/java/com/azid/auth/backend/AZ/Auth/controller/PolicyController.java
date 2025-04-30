@@ -37,4 +37,7 @@ public class PolicyController {
         PolicyDto response = policyService.getPolicyById(id);
         return ResponseEntity.ok(response);
     }
+
+
+
 }
