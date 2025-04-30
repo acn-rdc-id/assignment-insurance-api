@@ -5,9 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -21,9 +19,7 @@ public class QuotationApplication {
     @Column(name = "quotation_id")
     private Long id;
 
-    @Column(name = "title")
-    private String title;
-
+    // Personal info
     @Column(name = "full_name")
     private String fullName;
 
@@ -39,7 +35,7 @@ public class QuotationApplication {
     @Column(name = "country_of_birth")
     private String countryOfBirth;
 
-    @Column(name = "phoneNo")
+    @Column(name = "phone_no")
     private String phoneNo;
 
     @Column(name = "email")
@@ -60,33 +56,23 @@ public class QuotationApplication {
     @Column(name = "purpose_of_transaction")
     private String purposeOfTransaction;
 
+    @Column(name = "application_status")
+    private String applicationStatus; // PENDING, SUCCESS, FAILED
 
-    // payment details
-    @Column(name = "payment_date")
-    private Date paymentDate;
+    // Relations
+    @ManyToOne
+    @JoinColumn(name = "plan_id")
+    private Plan plan;
 
-    @Column(name = "payment_amount")
-    private BigDecimal paymentAmount;
+    // Plan info
+    @Column(name = "reference_number")
+    private String referenceNumber;
 
-    @Column(name = "payment_status")
-    private String paymentStatus;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    @Column(name = "payment_duration")
-    private Integer paymentDuration;
-
-    // plan details
-    @Column(name = "plan_name")
-    private String planName;
-
-    @Column(name = "coverage_amount")
-    private BigDecimal coverageAmount;
-
-    @Column(name = "base_premium")
-    private BigDecimal basePremium;
-
-    @Column(name = "plan_duration")
-    private Integer planDuration;
-
-
+    @OneToOne(mappedBy = "quotationApplication")
+    private Payment payment;
 
 }

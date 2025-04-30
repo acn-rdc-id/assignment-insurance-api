@@ -28,6 +28,11 @@ public class PlanService {
     @Autowired
     private PlanMapper planMapper;
 
+    public Plan getPlan(Long id) {
+        return planRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Plan not found"));
+    }
+
     public PlanResponseDto generatePlan(PlanRequestDto request) {
         LocalDate dob = request.getDateOfBirth();
         LocalDate today = LocalDate.now();

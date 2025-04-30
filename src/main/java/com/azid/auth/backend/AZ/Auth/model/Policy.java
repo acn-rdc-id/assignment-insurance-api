@@ -29,6 +29,9 @@ public class Policy {
     @Column(name = "end_date")
     private Date endDate;
 
+    @Column(name = "status")
+    private String status; // ACTIVE / CANCELLED / EXPIRED
+
     @ManyToOne
     @JoinColumn(name = "plan_id")
     private Plan plan;
@@ -38,14 +41,11 @@ public class Policy {
     private User user;
 
     @OneToOne
-    private Insured insured;
-
-    @OneToOne
+    @JoinColumn(name = "payment_id")
     private Payment payment;
 
-    @OneToMany(mappedBy = "policy")
-    private List<Claim> claims;
+    @OneToOne
+    @JoinColumn(name = "quotation_id")
+    private QuotationApplication quotationApplication;
 
-    @Column(name = "status")
-    private String status;
 }

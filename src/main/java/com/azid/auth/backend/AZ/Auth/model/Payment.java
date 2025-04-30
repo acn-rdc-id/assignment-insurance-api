@@ -27,11 +27,14 @@ public class Payment {
     private BigDecimal paymentAmount;
 
     @Column(name = "payment_status")
-    private String paymentStatus;
+    private String paymentStatus; // SUCCESS / FAILED
 
     @Column(name = "duration")
     private Integer duration;
 
+    @Column(name = "reference_number")
+    private String referenceNumber;
+
     @OneToOne
-    private Policy policy;
+    private QuotationApplication quotationApplication;
 }

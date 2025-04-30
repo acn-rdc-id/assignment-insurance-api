@@ -16,11 +16,16 @@ import java.util.Date;
 @Builder
 public class PaymentResponseDto {
 
-    @JsonIgnoreProperties
-    private Long id;
-    private Date paymentDate;
-    private BigDecimal paymentAmount;
-    private String paymentStatus;
-    private Integer duration;
-    private PolicyDto policy;
+//    @JsonIgnoreProperties
+//    private Long id;
+//    private Date paymentDate;
+//    private BigDecimal paymentAmount;
+//    private String paymentStatus;
+//    private Integer duration;
+//    private PolicyDto policy;
+
+    private String message;
+    private PolicyResponseDto policy;
+    private PaymentDetailsDto paymentDetails;
+    private PlanResponseDto planDetails;
 }

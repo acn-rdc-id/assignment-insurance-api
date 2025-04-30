@@ -14,33 +14,12 @@ import java.util.Date;
 @Data
 @Builder
 public class QuotationApplicationResponseDto {
-
-    @JsonIgnoreProperties
-    private Long id;
-    private String title;
-    private String fullName;
-    private String gender;
-    private String nationality;
-    private String identificationNo;
-    private String countryOfBirth;
-    private String phoneNo;
-    private String email;
-    @JsonIgnoreProperties
-    private Date dateOfBirth;
-    @JsonIgnoreProperties
-    private boolean isSmoker;
-    @JsonIgnoreProperties
-    private Integer cigarettesNo;
-    @JsonIgnoreProperties
-    private String occupation;
-    @JsonIgnoreProperties
-    private String purposeOfTransaction;
-    private Date paymentDate;
-    private BigDecimal paymentAmount;
-    private String paymentStatus;
-    private Integer paymentDuration;
-    private String planName;
-    private BigDecimal coverageAmount;
-    private BigDecimal basePremium;
-    private Integer planDuration;
+    public Long quotationId;
+    public String fullName;
+    public String email;
+    public String gender;
+    public String planName;
+    public BigDecimal basePremium;
+    public Integer duration;
+    public String applicationStatus;
 }

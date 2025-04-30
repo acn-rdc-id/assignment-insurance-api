@@ -1,6 +1,5 @@
 package com.azid.auth.backend.AZ.Auth.dto;
 
-import com.azid.auth.backend.AZ.Auth.model.*;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
