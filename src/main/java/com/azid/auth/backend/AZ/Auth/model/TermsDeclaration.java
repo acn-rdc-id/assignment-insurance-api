@@ -19,8 +19,8 @@ public class TermsDeclaration {
     @Column(name = "terms_id")
     private Long id;
 
-    @Lob //to store long HTML strings
-    @Column(name = "terms_html", nullable = false)
+    @Lob
+    @Column(name = "terms_html", nullable = false, columnDefinition = "TEXT")
     private String termsHtml;
 
     @Column(name = "status")
