@@ -15,9 +15,10 @@ import java.util.Date;
 @Builder
 public class ClaimDto {
 
-    private Long id;
+    private Long claimId;
+    private UserDto userDto;
+    private ClaimTypeDto claimType;
     private PolicyDto policy;
-    private String claimType;
     private Date claim_date;
     private String claimStatus;
 }
