@@ -4,12 +4,15 @@ import com.azid.auth.backend.AZ.Auth.dto.PolicyResponseDto;
 import com.azid.auth.backend.AZ.Auth.dto.QuotationApplicationRequestDto;
 import com.azid.auth.backend.AZ.Auth.dto.QuotationApplicationResponseDto;
 import com.azid.auth.backend.AZ.Auth.service.PolicyService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/policy")
 
@@ -22,8 +25,10 @@ public class PolicyController {
     }
 
     @GetMapping("/getAll")
-    public ResponseEntity<List<PolicyResponseDto>> getAllPolicies(){
-        List<PolicyResponseDto> policyList = policyService.getAllPolicies();
+    public ResponseEntity<List<PolicyResponseDto>> getAllPolicies(@RequestHeader HttpHeaders httpHeaders){
+        String userId = httpHeaders.getFirst("userId");
+        log.info(userId);
+        List<PolicyResponseDto> policyList = policyService.getAllPolicies(userId);
         return ResponseEntity.ok(policyList);
     }
 

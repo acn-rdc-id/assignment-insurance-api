@@ -42,8 +42,8 @@ public class PolicyService {
         this.commonUtils = commonUtils;
     }
 
-    public List<PolicyResponseDto> getAllPolicies() {
-        return policyRepository.findAll()
+    public List<PolicyResponseDto> getAllPolicies(String userId) {
+        return policyRepository.findByUserId(userId)
                 .stream()
                 .map(this::constructPolicyResponseDto)
                 .collect(Collectors.toList());
