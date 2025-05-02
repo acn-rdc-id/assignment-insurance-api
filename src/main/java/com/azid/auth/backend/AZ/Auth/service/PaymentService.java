@@ -1,7 +1,9 @@
 package com.azid.auth.backend.AZ.Auth.service;
 
+import com.azid.auth.backend.AZ.Auth.dto.PaymentDetailsDto;
 import com.azid.auth.backend.AZ.Auth.dto.PaymentRequestDto;
 import com.azid.auth.backend.AZ.Auth.dto.PaymentResponseDto;
+import com.azid.auth.backend.AZ.Auth.dto.PolicyResponseDto;
 import com.azid.auth.backend.AZ.Auth.mapper.PaymentMapper;
 import com.azid.auth.backend.AZ.Auth.mapper.PolicyMapper;
 import com.azid.auth.backend.AZ.Auth.model.Payment;
@@ -18,14 +20,12 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final PolicyService policyService;
-    private final PolicyMapper policyMapper;
     private final PaymentMapper paymentMapper;
     private final CommonUtils commonUtils;
 
     public PaymentService(PaymentRepository paymentRepository, PolicyService policyService, PolicyMapper policyMapper, PaymentMapper paymentMapper, CommonUtils commonUtils) {
         this.paymentRepository = paymentRepository;
         this.policyService = policyService;
-        this.policyMapper = policyMapper;
         this.paymentMapper = paymentMapper;
         this.commonUtils = commonUtils;
     }
@@ -41,15 +41,18 @@ public class PaymentService {
             payment.setDuration(requestDto.getDuration());
             payment.setPaymentStatus("SUCCESS");
             payment.setQuotationApplication(application);
+            payment.setReferenceNumber(commonUtils.generateReferenceNumber("T"));
             payment = paymentRepository.save(payment);
 
             policyService.updateStatusAndPayment(requestDto.getQuotationId(), "SUCCESS", payment);
-
-            Policy policy = policyService.createPolicy(application, payment);
-
+            Policy policy = policyService.createPolicy(application, payment, requestDto);
+            PolicyResponseDto policyResponseDto = policyService.constructPolicyResponseDto(policy);
+            responseDto.setPolicy(policyResponseDto);
             responseDto.setMessage("Payment success, policy created.");
-            responseDto.setPaymentDetails(paymentMapper.paymentToPaymentDetailsDto(payment));
-            responseDto.setPolicy(policyMapper.policyToPolicyResponseDTO(policy));
+
+            PaymentDetailsDto paymentDetailsDto = paymentMapper.paymentToPaymentDetailsDto(payment);
+            paymentDetailsDto.setPaymentId(payment.getId());
+            responseDto.setPaymentDetails(paymentDetailsDto);
 
         } else {
             policyService.updateStatusAndPayment(requestDto.getQuotationId(), "FAILED", null);

@@ -20,9 +20,7 @@ public class PlanController {
     private PlanService planService;
 
     @PostMapping("/get-quotationPlan")
-    public ResponseEntity<PlanResponseDto> getQuotationPlan(
-            HttpServletRequest request,
-            @RequestBody @Valid PlanRequestDto requestDto) {
+    public ResponseEntity<PlanResponseDto> getQuotationPlan(HttpServletRequest request, @RequestBody @Valid PlanRequestDto requestDto) {
         PlanResponseDto responseDto = planService.generatePlan(requestDto);
         return ResponseEntity.ok(responseDto);
     }
