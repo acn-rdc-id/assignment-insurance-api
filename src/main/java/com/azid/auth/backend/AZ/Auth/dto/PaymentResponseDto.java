@@ -27,5 +27,4 @@ public class PaymentResponseDto {
     private String message;
     private PolicyResponseDto policy;
     private PaymentDetailsDto paymentDetails;
-    private PlanResponseDto planDetails;
 }

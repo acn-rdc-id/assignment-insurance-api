@@ -1,12 +1,10 @@
 package com.azid.auth.backend.AZ.Auth.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.util.Date;
 
 @NoArgsConstructor
@@ -14,12 +12,18 @@ import java.util.Date;
 @Data
 @Builder
 public class QuotationApplicationResponseDto {
-    public Long quotationId;
+    public Long id;
     public String fullName;
-    public String email;
     public String gender;
-    public String planName;
-    public BigDecimal basePremium;
-    public Integer duration;
+    public String nationality;
+    public String identificationNo;
+    public String countryOfBirth;
+    public String phoneNo;
+    public String email;
+    public Date dateOfBirth;
+    public boolean isSmoker;
+    public Integer cigarettesNo;
+    public String occupation;
+    public String purposeOfTransaction;
     public String applicationStatus;
 }

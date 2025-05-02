@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
-import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,10 +19,7 @@ public class PolicyResponseDto {
     private String policyNo;
     private Date startDate;
     private Date endDate;
-    private PlanDetailsDto planDetailsDto;
-    private UserDto userDto;
-    private InsuredDto insuredDto;
-    private PaymentDto paymentDto;
-    private List<ClaimDto> claimDtoList;
+    private PlanInfoDto planResponseDto;
+    private QuotationApplicationResponseDto applicationResponseDto;
     private String status;
 }
