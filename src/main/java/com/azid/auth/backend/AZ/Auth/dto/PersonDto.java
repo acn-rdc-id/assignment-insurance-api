@@ -11,20 +11,23 @@ import java.util.Date;
 @AllArgsConstructor
 @Data
 @Builder
-public class QuotationApplicationResponseDto {
-    public Long id;
-    public String fullName;
+public class PersonDto {
+    public String userId;
     public String gender;
+    public Date dateOfBirth;
+    public Integer age;
+    public String title;
+    public String fullName;
     public String nationality;
     public String identificationNo;
+    public String otherId;
+    public boolean isUsPerson;
     public String countryOfBirth;
-    public String phoneNo;
-    public String email;
-    public Date dateOfBirth;
     public boolean isSmoker;
     public Integer cigarettesNo;
+    public String countryCode;
+    public String phoneNo;
     public String occupation;
+    public String email;
     public String purposeOfTransaction;
-    public String applicationStatus;
-    public PlanInfoDto planResponseDto;
 }

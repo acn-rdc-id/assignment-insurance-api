@@ -19,7 +19,6 @@ public class PolicyResponseDto {
     private String policyNo;
     private Date startDate;
     private Date endDate;
-    private PlanInfoDto planResponseDto;
     private QuotationApplicationResponseDto applicationResponseDto;
     private String status;
 }
