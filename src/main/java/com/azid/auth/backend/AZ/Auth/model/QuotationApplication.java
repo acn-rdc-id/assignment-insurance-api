@@ -1,10 +1,13 @@
 package com.azid.auth.backend.AZ.Auth.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
@@ -32,8 +35,14 @@ public class QuotationApplication {
     @Column(name = "identification_no")
     private String identificationNo;
 
+    @Column(name = "other_id")
+    private String otherId;
+
     @Column(name = "country_of_birth")
     private String countryOfBirth;
+
+    @Column(name = "country_code")
+    private String countryCode;
 
     @Column(name = "phone_no")
     private String phoneNo;
@@ -44,8 +53,17 @@ public class QuotationApplication {
     @Column(name = "date_of_birth")
     private Date dateOfBirth;
 
+    @Column(name = "age")
+    private Integer age;
+
+    @Column(name = "title")
+    private String title;
+
     @Column(name = "is_smoker")
     private boolean isSmoker;
+
+    @Column(name = "is_us_person")
+    private boolean isUsPerson;
 
     @Column(name = "cigarettes_no")
     private Integer cigarettesNo;
@@ -59,20 +77,29 @@ public class QuotationApplication {
     @Column(name = "application_status")
     private String applicationStatus; // PENDING, SUCCESS, FAILED
 
-    // Relations
+    @Column(name = "reference_number")
+    private String referenceNumber;
+
+    @Column(name = "premium_amount")
+    private BigDecimal premiumAmount;
+
+    @Column(name = "premium_mode")
+    private String premiumMode;
+
     @ManyToOne
     @JoinColumn(name = "plan_id")
     private Plan plan;
-
-    // Plan info
-    @Column(name = "reference_number")
-    private String referenceNumber;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
     @OneToOne(mappedBy = "quotationApplication")
+    @JsonIgnore
     private Payment payment;
+
+    @OneToOne(mappedBy = "quotationApplication")
+    @JsonBackReference //do not serialize (used to break loop)
+    private Policy policy;
 
 }

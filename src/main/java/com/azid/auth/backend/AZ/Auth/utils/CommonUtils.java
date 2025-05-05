@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CommonUtils {
 
-    public String generatePolicyNumber(String code) {
+    public String generateReferenceNumber(String code) {
         return code + System.currentTimeMillis();
     }
 }

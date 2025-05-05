@@ -10,4 +10,5 @@ public interface QuotationApplicationMapper {
 
     QuotationApplication toEntity(QuotationApplicationDto dto);
     QuotationApplicationDto toDto(QuotationApplication quotationApplication);
+    QuotationApplicationResponseDto toResponseDto(QuotationApplication quotationApplication);
 }

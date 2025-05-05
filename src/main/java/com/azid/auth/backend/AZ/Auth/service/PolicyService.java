@@ -1,11 +1,10 @@
 package com.azid.auth.backend.AZ.Auth.service;
 
 import com.azid.auth.backend.AZ.Auth.dto.*;
-import com.azid.auth.backend.AZ.Auth.mapper.PaymentMapper;
+import com.azid.auth.backend.AZ.Auth.mapper.PlanMapper;
 import com.azid.auth.backend.AZ.Auth.mapper.PolicyMapper;
 import com.azid.auth.backend.AZ.Auth.mapper.QuotationApplicationMapper;
 import com.azid.auth.backend.AZ.Auth.model.*;
-import com.azid.auth.backend.AZ.Auth.repository.PaymentRepository;
 import com.azid.auth.backend.AZ.Auth.repository.PolicyRepository;
 import com.azid.auth.backend.AZ.Auth.repository.QuotationApplicationRepository;
 import com.azid.auth.backend.AZ.Auth.repository.UserRepository;
@@ -14,6 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -23,23 +25,17 @@ public class PolicyService {
     private final QuotationApplicationRepository quotationApplicationRepository;
     private final PolicyMapper policyMapper;
     private final QuotationApplicationMapper quotationApplicationMapper;
+    private final PlanMapper planMapper;
     private final PlanService planService;
     private final UserService userService;
     private final CommonUtils commonUtils;
 
-    public PolicyDto getPolicyById(Long id) {
-        Policy policy = policyRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Policy not found with id: " + id));
-        return policyMapper.toDto(policy);
-    }
-
     public PolicyService(
             PolicyRepository policyRepository,
-            PaymentRepository paymentRepository,
             QuotationApplicationRepository quotationApplicationRepository,
             PolicyMapper policyMapper,
-            PaymentMapper paymentMapper,
-            QuotationApplicationMapper quotationApplicationMapper, UserRepository userRepository, PlanService planService, UserService userService, CommonUtils commonUtils) {
+            QuotationApplicationMapper quotationApplicationMapper, UserRepository userRepository, PlanService planService, UserService userService, CommonUtils commonUtils,
+            PlanMapper planMapper) {
 
         this.policyRepository = policyRepository;
         this.quotationApplicationRepository = quotationApplicationRepository;
@@ -48,76 +44,121 @@ public class PolicyService {
         this.planService = planService;
         this.userService = userService;
         this.commonUtils = commonUtils;
+        this.planMapper = planMapper;
     }
 
-    public QuotationApplicationResponseDto createQuotationApplication(QuotationApplicationDto dto){
-
-        QuotationApplication quotationApplication = quotationApplicationMapper.toEntity(dto);
-        QuotationApplication savedQuote = quotationApplicationRepository.save(quotationApplication);
-        QuotationApplicationDto quotationApplicationDto = quotationApplicationMapper.toDto(savedQuote);
-
-        QuotationApplicationResponseDto quotationApplicationResponseDto = new QuotationApplicationResponseDto();
-        quotationApplicationResponseDto.setFullName(quotationApplicationDto.getFullName());
-        return quotationApplicationResponseDto;
+    public List<PolicyResponseDto> getAllPolicies(String userId) {
+        return policyRepository.findByUserId(userId)
+                .stream()
+                .map(this::constructPolicyResponseDto)
+                .collect(Collectors.toList());
     }
+
+    public PolicyResponseDto getPolicyById(Long id) {
+        log.info("start [getPolicyById] policyId: {}", id);
+        Policy policy = policyRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Policy not found with ID: " + id));
+        return constructPolicyResponseDto(policy);
+    }
+
+    public PolicyResponseDto constructPolicyResponseDto(Policy policy) {
+        log.info("start [constructPolicyResponseDto] policyId: {}", policy.getId());
+        PolicyResponseDto policyResponseDto = policyMapper.policyToPolicyResponseDTO(policy);
+
+        Plan plan = policy.getPlan();
+        QuotationApplication quotationApplication = policy.getQuotationApplication();
+        PlanInfoDto planInfoDto = PlanInfoDto.builder()
+                .id(plan.getId())
+                .planName(plan.getPlanName())
+                .coverageTerm(plan.getDuration().toString().concat(" years"))
+                .sumAssured(plan.getCoverageAmount())
+                .premiumAmount(quotationApplication.getPremiumAmount())
+                .premiumMode(quotationApplication.getPremiumMode())
+                .referenceNumber(quotationApplication.getReferenceNumber())
+                .build();
+
+        QuotationApplicationResponseDto applicationResponseDto = quotationApplicationMapper.toResponseDto(quotationApplication);
+        applicationResponseDto.setPlanResponseDto(planInfoDto);
+        policyResponseDto.setApplicationResponseDto(applicationResponseDto);
+        return policyResponseDto;
+    }
+
 
     public QuotationApplication getQuotationApplication(Long id) {
+        log.info("start [getQuotationApplication] applicationId: {}", id);
         return quotationApplicationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Quotation Application not found"));
     }
 
     public QuotationApplicationResponseDto createApplication(QuotationApplicationRequestDto requestDto) {
-        Plan plan = planService.getPlan(requestDto.getPlanId());
-        User user = userService.getUserByUserId(requestDto.getUserId());
-
-        QuotationApplication application = new QuotationApplication();
-        application.setFullName(requestDto.fullName);
-        application.setGender(requestDto.gender);
-        application.setNationality(requestDto.nationality);
-        application.setIdentificationNo(requestDto.identificationNo);
-        application.setCountryOfBirth(requestDto.countryOfBirth);
-        application.setPhoneNo(requestDto.phoneNo);
-        application.setEmail(requestDto.email);
-        application.setDateOfBirth(requestDto.dateOfBirth);
-        application.setSmoker(requestDto.isSmoker);
-        application.setCigarettesNo(requestDto.cigarettesNo);
-        application.setOccupation(requestDto.occupation);
-        application.setPurposeOfTransaction(requestDto.purposeOfTransaction);
-
-        application.setUser(user);
-        application.setPlan(plan);
-        application.setApplicationStatus("PENDING");
-
-        QuotationApplication savedApplication = quotationApplicationRepository.save(application);
-        QuotationApplicationDto quotationApplicationDto = quotationApplicationMapper.toDto(savedApplication);
-        log.info("quotationApplicationDto: " + quotationApplicationDto);
-
+        PersonDto personDto = requestDto.getPersonDto();
+        PlanInfoDto planInfoDto = requestDto.getPlanInfoDto();
         QuotationApplicationResponseDto responseDto = new QuotationApplicationResponseDto();
-        responseDto.setQuotationId(quotationApplicationDto.getId());
 
-        responseDto.setPlanName(quotationApplicationDto.getPlan().getPlanName());
-        responseDto.setBasePremium(quotationApplicationDto.getPlan().getBasePremium());
-        responseDto.setDuration(quotationApplicationDto.getPlan().getDuration());
-        responseDto.setFullName(quotationApplicationDto.getFullName());
-        responseDto.setEmail(quotationApplicationDto.getEmail());
-        responseDto.setGender(quotationApplicationDto.getGender());
-        responseDto.setApplicationStatus(quotationApplicationDto.getApplicationStatus());
+        if (Objects.nonNull(personDto) && Objects.nonNull(planInfoDto)) {
+            Plan plan = planService.getPlan(planInfoDto.getId());
+            User user = userService.getUserByUserId(personDto.getUserId());
 
-        //QuotationAppResponseDto responseDto = policyMapper.toResponseDTO();
+            QuotationApplication application = new QuotationApplication();
+            // personDto
+            application.setFullName(personDto.getFullName());
+            application.setGender(personDto.getGender());
+            application.setNationality(personDto.getNationality());
+            application.setIdentificationNo(personDto.getIdentificationNo());
+            application.setOtherId(personDto.getOtherId());//new add
+            application.setCountryOfBirth(personDto.getCountryOfBirth());
+            application.setAge(personDto.getAge()); //new add
+            application.setTitle(personDto.getTitle()); // new add
+            application.setCountryCode(personDto.getCountryCode());
+            application.setPhoneNo(personDto.getPhoneNo());
+            application.setEmail(personDto.getEmail());
+            application.setDateOfBirth(personDto.getDateOfBirth());
+            if(personDto.isSmoker) {
+                application.setSmoker(personDto.isSmoker());
+            }
+            else{
+                application.setSmoker(false);
+            }
+            if(personDto.isUsPerson){
+                application.setUsPerson(personDto.isUsPerson());}
+            else{
+                application.setUsPerson(false);
+            }//new add
+            application.setCigarettesNo(personDto.getCigarettesNo());
+            application.setOccupation(personDto.getOccupation());
+            application.setPurposeOfTransaction(personDto.getPurposeOfTransaction());
+
+            //planInfoDto
+            application.setPremiumAmount(planInfoDto.getPremiumAmount());
+            application.setPremiumMode(planInfoDto.getPremiumMode());
+            application.setReferenceNumber(planInfoDto.getReferenceNumber());
+
+            application.setUser(user);
+            application.setPlan(plan);
+            application.setApplicationStatus("PENDING");
+
+            QuotationApplication savedApplication = quotationApplicationRepository.save(application);
+            responseDto =  quotationApplicationMapper.toResponseDto(savedApplication);
+            responseDto.setPlanResponseDto(requestDto.getPlanInfoDto());
+            responseDto.setId(savedApplication.getId());
+        }
+
+
+
         log.info("responseDto: " + responseDto);
         return responseDto;
     }
 
     public Policy createPolicy(QuotationApplication application, Payment payment) {
         Policy policy = new Policy();
-        policy.setPolicyNo(commonUtils.generatePolicyNumber("POL"));
+        policy.setPolicyNo(commonUtils.generateReferenceNumber("POL"));
         policy.setStartDate(new Date());
         policy.setEndDate(new Date(System.currentTimeMillis() + 31536000000L));
         policy.setStatus("ACTIVE");
+        policy.setQuotationApplication(application);
         policy.setPlan(application.getPlan());
         policy.setUser(application.getUser());
         policy.setPayment(payment);
-        policy.setQuotationApplication(application);
         return policyRepository.save(policy);
     }
 
@@ -129,5 +170,6 @@ public class PolicyService {
         }
         quotationApplicationRepository.save(application);
     }
+
 
 }
