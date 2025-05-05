@@ -3,10 +3,12 @@ package com.azid.auth.backend.AZ.Auth.controller;
 import com.azid.auth.backend.AZ.Auth.dto.PolicyResponseDto;
 import com.azid.auth.backend.AZ.Auth.dto.QuotationApplicationRequestDto;
 import com.azid.auth.backend.AZ.Auth.dto.QuotationApplicationResponseDto;
+import com.azid.auth.backend.AZ.Auth.dtos.ApiResponseDto;
 import com.azid.auth.backend.AZ.Auth.service.PolicyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +36,7 @@ public class PolicyController {
     @GetMapping("/{id}")
     public ResponseEntity<PolicyResponseDto> getPolicyById(@PathVariable Long id) {
         PolicyResponseDto response = policyService.getPolicyById(id);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new ApiResponseDto<>("Success", HttpStatus.OK.value(), "Policy Details retrieved Successfully!!", response).getData());
     }
 
     @PostMapping("/create-application")
