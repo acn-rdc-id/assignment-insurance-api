@@ -113,8 +113,17 @@ public class PolicyService {
             application.setPhoneNo(personDto.getPhoneNo());
             application.setEmail(personDto.getEmail());
             application.setDateOfBirth(personDto.getDateOfBirth());
-            application.setSmoker(personDto.isSmoker());
-            application.setUsPerson(personDto.isUsPerson()); //new add
+            if(personDto.isSmoker) {
+                application.setSmoker(personDto.isSmoker());
+            }
+            else{
+                application.setSmoker(false);
+            }
+            if(personDto.isUsPerson){
+                application.setUsPerson(personDto.isUsPerson());}
+            else{
+                application.setUsPerson(false);
+            }//new add
             application.setCigarettesNo(personDto.getCigarettesNo());
             application.setOccupation(personDto.getOccupation());
             application.setPurposeOfTransaction(personDto.getPurposeOfTransaction());
