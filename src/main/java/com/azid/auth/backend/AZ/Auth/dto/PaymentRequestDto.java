@@ -15,6 +15,4 @@ public class PaymentRequestDto {
 
     private Long quotationId;
     private BigDecimal paymentAmount;
-    private Integer duration;
-    private PlanInfoDto planInfo;
 }

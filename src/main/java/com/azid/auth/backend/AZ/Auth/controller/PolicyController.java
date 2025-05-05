@@ -17,7 +17,6 @@ import java.util.List;
 @RequestMapping("/api/policy")
 
 public class PolicyController {
-    @Autowired
     private final PolicyService policyService;
 
     public PolicyController(PolicyService policyService) {

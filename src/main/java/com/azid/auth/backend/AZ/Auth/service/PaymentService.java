@@ -38,14 +38,13 @@ public class PaymentService {
             Payment payment = new Payment();
             payment.setPaymentAmount(requestDto.getPaymentAmount());
             payment.setPaymentDate(new Date());
-            payment.setDuration(requestDto.getDuration());
             payment.setPaymentStatus("SUCCESS");
             payment.setQuotationApplication(application);
             payment.setReferenceNumber(commonUtils.generateReferenceNumber("T"));
             payment = paymentRepository.save(payment);
 
             policyService.updateStatusAndPayment(requestDto.getQuotationId(), "SUCCESS", payment);
-            Policy policy = policyService.createPolicy(application, payment, requestDto);
+            Policy policy = policyService.createPolicy(application, payment);
             PolicyResponseDto policyResponseDto = policyService.constructPolicyResponseDto(policy);
             responseDto.setPolicy(policyResponseDto);
             responseDto.setMessage("Payment success, policy created.");
