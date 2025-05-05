@@ -28,12 +28,14 @@ public class PlanService {
     @Autowired
     private PlanMapper planMapper;
 
+    public Plan getPlan(Long id) {
+        return planRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Plan not found"));
+    }
+
     public PlanResponseDto generatePlan(PlanRequestDto request) {
         LocalDate dob = request.getDateOfBirth();
         LocalDate today = LocalDate.now();
-
-        // TODO: add validation for gender request
-        //String gender = request.getGender().equalsIgnoreCase("male") ? "M" : "F";
 
         String genderInput = request.getGender();
         if (genderInput == null || (!genderInput.equalsIgnoreCase("male") && !genderInput.equalsIgnoreCase("female"))) {
@@ -55,6 +57,7 @@ public class PlanService {
 
             if (monthlyPremium != null && yearlyPremium != null) {
                 PlanDetailsDto detail = new PlanDetailsDto();
+                detail.setId(plan.getId());
                 detail.setPlanName(plan.getPlanName());
                 detail.setSumAssured(plan.getCoverageAmount());
                 detail.setMonthlyPremium(monthlyPremium);

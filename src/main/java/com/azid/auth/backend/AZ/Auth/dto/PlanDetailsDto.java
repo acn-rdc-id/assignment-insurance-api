@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 public class PlanDetailsDto {
+    private Long id;
     private String planName;
     private Double sumAssured;
     private String coverageTerm;

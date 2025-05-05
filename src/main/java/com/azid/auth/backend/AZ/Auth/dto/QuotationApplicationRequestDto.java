@@ -5,13 +5,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
 @Builder
-public class PaymentResponseDto {
+public class QuotationApplicationRequestDto {
+    public PersonDto personDto;
+    public PlanInfoDto planInfoDto;
 
-    private String message;
-    private PolicyResponseDto policy;
-    private PaymentDetailsDto paymentDetails;
 }
