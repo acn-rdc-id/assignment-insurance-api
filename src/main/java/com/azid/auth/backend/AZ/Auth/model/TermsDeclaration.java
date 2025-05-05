@@ -31,4 +31,7 @@ public class TermsDeclaration {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column (name ="is_required")
+    private Boolean isRequired;
 }
