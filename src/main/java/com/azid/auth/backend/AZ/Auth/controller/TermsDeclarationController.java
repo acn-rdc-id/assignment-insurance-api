@@ -1,9 +1,14 @@
 package com.azid.auth.backend.AZ.Auth.controller;
 
 import com.azid.auth.backend.AZ.Auth.dto.TermsDeclarationDto;
+import com.azid.auth.backend.AZ.Auth.dtos.ApiResponseDto;
 import com.azid.auth.backend.AZ.Auth.service.TermsDeclarationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,12 +22,18 @@ import java.util.List;
 
 public class TermsDeclarationController {
 
- private final TermsDeclarationService termsDeclarationService;
+    private final TermsDeclarationService termsDeclarationService;
 
- @GetMapping
-    public List<TermsDeclarationDto>getAllTermsDeclarations()
- {
-     return termsDeclarationService.getAllTerms();
- }
+    @GetMapping
+    public ResponseEntity<ApiResponseDto<List<TermsDeclarationDto>>> getActiveTerms(
+            @RequestHeader HttpHeaders httpHeaders) {
+
+        List<TermsDeclarationDto> termsDeclarationDtos = termsDeclarationService.getAllTerms();
+
+        return ResponseEntity.ok(
+                new ApiResponseDto<>("Success", HttpStatus.OK.value(), "Active terms retrieved successfully", termsDeclarationDtos)
+        );
+    }
+
 
 }
