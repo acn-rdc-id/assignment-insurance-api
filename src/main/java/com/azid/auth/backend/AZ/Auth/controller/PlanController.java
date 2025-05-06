@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/plan")
 public class PlanController {
@@ -23,7 +21,7 @@ public class PlanController {
     @Autowired
     private PlanService planService;
 
-    @PostMapping("/get-quotationPlan")
+    @PostMapping("/get-quotation-plan")
     public ResponseEntity<ApiResponseDto<PlanResponseDto>> getQuotationPlan(
             HttpServletRequest request,
             @RequestBody @Valid PlanRequestDto requestDto) {
