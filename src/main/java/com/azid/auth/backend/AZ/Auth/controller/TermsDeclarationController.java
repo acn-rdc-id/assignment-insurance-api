@@ -11,18 +11,18 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/terms")
+@RequestMapping("/api/terms")
 @RequiredArgsConstructor
+
 
 public class TermsDeclarationController {
 
  private final TermsDeclarationService termsDeclarationService;
 
  @GetMapping
-    public List<TermsDeclarationDto>getAllTermsDeclarations(){
+    public List<TermsDeclarationDto>getAllTermsDeclarations()
+ {
      return termsDeclarationService.getAllTerms();
  }
-
-
 
 }

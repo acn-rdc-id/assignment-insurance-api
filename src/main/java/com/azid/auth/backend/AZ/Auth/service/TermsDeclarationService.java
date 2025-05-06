@@ -17,7 +17,9 @@ public class TermsDeclarationService {
     private final TermsDeclarationMapper termsDeclarationMapper;
 
     public List<TermsDeclarationDto>getAllTerms(){
-        return termsDeclarationRepository.findAll().stream().map(termsDeclarationMapper::toDto).collect(Collectors.toList());
+        return termsDeclarationRepository.findAll().stream()
+                .filter(term -> "ACTIVE".equalsIgnoreCase(term.getStatus()))
+                .map(termsDeclarationMapper::toDto).collect(Collectors.toList());
     }
 
 }
