@@ -4,6 +4,7 @@ import com.azid.auth.backend.AZ.Auth.dto.TermsDeclarationDto;
 import com.azid.auth.backend.AZ.Auth.mapper.TermsDeclarationMapper;
 import com.azid.auth.backend.AZ.Auth.repository.TermsDeclarationRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,12 +12,14 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TermsDeclarationService {
 
     private  final TermsDeclarationRepository termsDeclarationRepository;
     private final TermsDeclarationMapper termsDeclarationMapper;
 
     public List<TermsDeclarationDto>getAllTerms(){
+
         return termsDeclarationRepository.findAll().stream().map(termsDeclarationMapper::toDto).collect(Collectors.toList());
     }
 
