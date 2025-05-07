@@ -1,5 +1,6 @@
 package com.azid.auth.backend.AZ.Auth.service;
 
+import com.azid.auth.backend.AZ.Auth.exceptions.ResourceNotFoundException;
 import com.azid.auth.backend.AZ.Auth.model.User;
 import com.azid.auth.backend.AZ.Auth.repository.UserRepository;
 import org.slf4j.Logger;
@@ -52,12 +53,7 @@ public class UserService {
 
     public User getUserByUserId(String userId) {
         return userRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-    }
-
-    public User getUserIdById(String id) {
-        return userRepository.findByUserId(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 
 
