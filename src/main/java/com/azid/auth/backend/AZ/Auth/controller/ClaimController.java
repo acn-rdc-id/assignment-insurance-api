@@ -2,8 +2,11 @@ package com.azid.auth.backend.AZ.Auth.controller;
 
 import com.azid.auth.backend.AZ.Auth.dto.ClaimInfoResponse;
 import com.azid.auth.backend.AZ.Auth.dto.ClaimResponseDto;
+import com.azid.auth.backend.AZ.Auth.dtos.ApiResponseDto;
 import com.azid.auth.backend.AZ.Auth.service.ClaimService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/claim")
 public class ClaimController {
@@ -41,32 +45,72 @@ public class ClaimController {
     }
 
     @GetMapping("/claimpolicydocument/{userId}")
-    public ClaimInfoResponse getPolicyByUserId(@PathVariable Long userId) {
-        //todo implement logic to fetch policy by user id
+    public ResponseEntity<ApiResponseDto<ClaimInfoResponse>> getPolicyByUserId(@PathVariable String userId) {
+        ApiResponseDto<ClaimInfoResponse> apiResponseDto = null;
 
+        log.info("Start process for get claim policy document for userId: {}", userId);
+        try {
+            if (userId == null || userId.isEmpty()) {
+                log.error("User ID is null or empty");
+                apiResponseDto = new ApiResponseDto<>("Error", HttpStatus.BAD_REQUEST.value(), "User ID cannot be null or empty", null);
+            }
 
-        ClaimInfoResponse claimInfoResponse = claimService.getClaimInfoByUserId(userId);
-        return  claimInfoResponse;
+            log.info("Fetching claim policy document for userId: {}", userId);
+            ClaimInfoResponse claimInfoResponse = claimService.getClaimInfoByUserId(userId);
+            if(claimInfoResponse == null) {
+                log.error("No claim policy document found for userId: {}", userId);
+                apiResponseDto = new ApiResponseDto<>("Error", HttpStatus.NOT_FOUND.value(), "No claim policy document found", null);
+            } else {
+                log.info("Claim policy document retrieved successfully for userId: {}", userId);
+                log.info("End process for get claim policy document");
+                apiResponseDto = new ApiResponseDto<>("Success", HttpStatus.OK.value(), "Claim Policy Document Retrieved Successfully!", claimInfoResponse);
+            }
+
+        }catch (Exception e) {
+            log.error("Error occurred while retrieving claim policy document for userId: {}. Error: {}", userId, e.getMessage());
+            apiResponseDto = new ApiResponseDto<>("Error", HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error", null);
+        }
+
+        return ResponseEntity.ok(apiResponseDto);
 
     }
 
     @PostMapping("/submit")
-    public ResponseEntity<ClaimResponseDto> submitClaim(@RequestParam("policyID") String policyID,
+    public ResponseEntity<ApiResponseDto<ClaimInfoResponse>> submitClaim(@RequestParam("policyID") String policyID,
                                                         @RequestParam("userID") String userID,
                                                         @RequestParam("claimTypeID") String claimTypeID,
                                                         @RequestPart("files") List<MultipartFile> files) {
-        //todo implement logic to submit claim
+        ApiResponseDto  apiResponseDto = null;
 
-        claimService.submitClaim(policyID, userID, claimTypeID, files);
+        log.info("Start process for submit claim policy document for userId: {}", userID);
+        try{
+            if (policyID == null || policyID.isEmpty()) {
+                log.error("Policy ID is null or empty");
+                apiResponseDto = new ApiResponseDto<>("Error", HttpStatus.BAD_REQUEST.value(), "Policy ID cannot be null or empty", null);
+            }
+            if (userID == null || userID.isEmpty()) {
+                log.error("User ID is null or empty");
+                apiResponseDto = new ApiResponseDto<>("Error", HttpStatus.BAD_REQUEST.value(), "User ID cannot be null or empty", null);
+            }
+            if (claimTypeID == null || claimTypeID.isEmpty()) {
+                log.error("Claim Type ID is null or empty");
+                apiResponseDto = new ApiResponseDto<>("Error", HttpStatus.BAD_REQUEST.value(), "Claim Type ID cannot be null or empty", null);
+            }
 
-
-
-
-
-
-        ClaimResponseDto responseDto = new ClaimResponseDto();
-
-
-        return ResponseEntity.ok(responseDto);
+            ClaimResponseDto responseDto = claimService.submitClaim(policyID, userID, claimTypeID, files);
+            if(responseDto == null) {
+                log.error("No claim policy document found for userId: {}", userID);
+                apiResponseDto = new ApiResponseDto<>("Error", HttpStatus.NOT_FOUND.value(), "No claim policy document found", null);
+            } else {
+                log.info("Claim policy document submitted successfully for userId: {}", userID);
+                log.info("End process for submit claim policy document");
+                apiResponseDto = new ApiResponseDto<>("Success", HttpStatus.OK.value(), "Claim Policy Document Submitted Successfully!", responseDto);
+            }
+        }
+        catch (Exception e) {
+            log.error("Error occurred while validating input parameters for claim submission: {}", e.getMessage());
+            apiResponseDto = new ApiResponseDto<>("Error", HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error", null);
+        }
+        return ResponseEntity.ok(apiResponseDto);
     }
 }

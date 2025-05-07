@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Data
@@ -31,6 +32,6 @@ public class ClaimDocument {
     private String documentUrl;
 
     @Column(name="claim_document_upload")
-    private Date documentUpload;
+    private LocalDate documentUpload;
 
 }
