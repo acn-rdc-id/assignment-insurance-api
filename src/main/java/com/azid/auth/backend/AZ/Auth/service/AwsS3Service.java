@@ -2,7 +2,7 @@ package com.azid.auth.backend.AZ.Auth.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
-import com.example.demo.model.UploadS3Respond;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -27,16 +27,16 @@ public class AwsS3Service {
         this.amazonS3 = amazonS3;
     }
 
-    public UploadS3Respond uploadFileToS3(String folderName, List<MultipartFile> files) {
+    public void uploadFileToS3(String policyID,String folderName, List<MultipartFile> files) {
         String folderKey = folderName.endsWith("/") ? rootFolder+folderName : rootFolder+folderName + "/";
 
-        UploadS3Respond uploadS3Respond = new UploadS3Respond();
         // Check if the folder already exists
         if (!amazonS3.doesObjectExist(bucketName, folderKey)) {
             amazonS3.putObject(bucketName,folderKey,"");
             for (MultipartFile file : files) {
                 try {
-                    String filekey = folderKey + file.getOriginalFilename();
+                    String prefix = policyID+"_";
+                    String filekey = folderKey + prefix + file.getOriginalFilename();
 
                     ObjectMetadata objectMetadata = new ObjectMetadata();
                     objectMetadata.setContentType(file.getContentType());
@@ -45,25 +45,15 @@ public class AwsS3Service {
                     //insert file insto s3 folder
                     log.info("Uploading file to S3: {}", file.getOriginalFilename());
                     amazonS3.putObject(bucketName, filekey, file.getInputStream(), objectMetadata);
-                    uploadS3Respond.setStatus("200");
-                    uploadS3Respond.setMessage("Successfully uploaded file to S3");
-                    uploadS3Respond.setFolderName(folderName);
 
                 } catch (Exception e) {
-                    uploadS3Respond.setStatus("404");
-                    uploadS3Respond.setMessage("Failed uploaded file to S3");
-                    uploadS3Respond.setFolderName(folderName);
+                    log.error("Error uploading file to S3: {}", e.getMessage());
                 }
             }
         }else {
             log.info("Folder already exists in S3: {}", folderName);
-            uploadS3Respond.setStatus("404");
-            uploadS3Respond.setMessage("Failed uploaded file to S3");
-            uploadS3Respond.setFolderName(folderName);
+
         }
-
-
-        return uploadS3Respond;
     }
 
     public List<String> listFilesByPolicyId(String policyID,String folderPath) {
