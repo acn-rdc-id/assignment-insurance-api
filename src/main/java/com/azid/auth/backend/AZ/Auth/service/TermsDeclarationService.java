@@ -24,12 +24,11 @@ public class TermsDeclarationService {
                 .filter(term -> "ACTIVE".equalsIgnoreCase(term.getStatus()))
                 .map(termsDeclarationMapper::toDto)
                 .collect(Collectors.toList());
-        if (activeTerms.isEmpty()) {
-            throw new ResourceNotFoundException("No active terms declarations found.");
-        }
-        return termsDeclarationRepository.findAll().stream().map(termsDeclarationMapper::toDto).collect(Collectors.toList());
+
+
+            if (activeTerms.isEmpty()) {
+        throw new ResourceNotFoundException("No active terms declarations found.");
     }
+       return activeTerms;
 
-
-}
-}
+}}

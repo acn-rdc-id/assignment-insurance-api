@@ -38,4 +38,4 @@ public class TermsDeclarationController {
         return ResponseEntity.ok(
                 new ApiResponseDto<>("Success", HttpStatus.OK.value(), "Active terms retrieved successfully", termsDeclarationDtos)
         );
-}
+}}
