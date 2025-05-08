@@ -1,10 +1,12 @@
 package com.azid.auth.backend.AZ.Auth.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -29,6 +31,18 @@ public class Policy {
     @Column(name = "end_date")
     private Date endDate;
 
+    @Column(name = "status")
+    private String status; // ACTIVE / CANCELLED / EXPIRED
+
+    @Column(name = "premium_amount")
+    private BigDecimal premiumAmount;
+
+    @Column(name = "premium_mode")
+    private String premiumMode;
+
+    @Column(name = "reference_number")
+    private String referenceNumber;
+
     @ManyToOne
     @JoinColumn(name = "plan_id")
     private Plan plan;
@@ -38,14 +52,7 @@ public class Policy {
     private User user;
 
     @OneToOne
-    private Insured insured;
-
-    @OneToOne
+    @JoinColumn(name = "payment_id")
+    @JsonIgnore
     private Payment payment;
-
-    @OneToMany(mappedBy = "policy")
-    private List<Claim> claims;
-
-    @Column(name = "status")
-    private String status;
 }

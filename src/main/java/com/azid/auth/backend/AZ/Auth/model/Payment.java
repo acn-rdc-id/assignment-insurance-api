@@ -33,5 +33,6 @@ public class Payment {
     private Integer duration;
 
     @OneToOne
+    @JoinColumn(name = "policy_id")
     private Policy policy;
 }
