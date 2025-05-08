@@ -1,6 +1,5 @@
 package com.azid.auth.backend.AZ.Auth.dto;
 
-import com.azid.auth.backend.AZ.Auth.model.enums.GenderEnum;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
@@ -21,7 +20,5 @@ public class PlanRequestDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate dateOfBirth;
 
-    @NotNull(message = "Gender is required.")
-    private GenderEnum gender;
-
+    private String gender;
 }

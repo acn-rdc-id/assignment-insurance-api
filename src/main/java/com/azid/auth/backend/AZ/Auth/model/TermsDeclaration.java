@@ -19,8 +19,8 @@ public class TermsDeclaration {
     @Column(name = "terms_id")
     private Long id;
 
-    @Lob
-    @Column(name = "terms_html", nullable = false, columnDefinition = "TEXT")
+    @Lob //to store long HTML strings
+    @Column(name = "terms_html", nullable = false)
     private String termsHtml;
 
     @Column(name = "status")
@@ -31,7 +31,4 @@ public class TermsDeclaration {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    @Column (name ="is_required")
-    private Boolean isRequired;
 }

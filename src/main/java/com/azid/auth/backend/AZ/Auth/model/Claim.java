@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -34,7 +33,7 @@ public class Claim {
     private Policy policy;
 
     @Column(name = "claim_date")
-    private LocalDate claim_date;
+    private Date claim_date;
 
     @Column(name = "claim_status")
     private String claimStatus;

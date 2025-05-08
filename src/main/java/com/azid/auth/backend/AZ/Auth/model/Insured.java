@@ -5,20 +5,18 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "quotation_application")
-public class QuotationApplication {
+@Table(name = "insured")
+public class Insured {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "quotation_id")
+    @Column(name = "insured_id")
     private Long id;
 
     @Column(name = "title")
@@ -60,33 +58,10 @@ public class QuotationApplication {
     @Column(name = "purpose_of_transaction")
     private String purposeOfTransaction;
 
+    @OneToOne
+    private Policy policy;
 
-    // payment details
-    @Column(name = "payment_date")
-    private Date paymentDate;
-
-    @Column(name = "payment_amount")
-    private BigDecimal paymentAmount;
-
-    @Column(name = "payment_status")
-    private String paymentStatus;
-
-    @Column(name = "payment_duration")
-    private Integer paymentDuration;
-
-    // plan details
-    @Column(name = "plan_name")
-    private String planName;
-
-    @Column(name = "coverage_amount")
-    private BigDecimal coverageAmount;
-
-    @Column(name = "base_premium")
-    private BigDecimal basePremium;
-
-    @Column(name = "plan_duration")
-    private Integer planDuration;
-
-
-
+    @ManyToOne
+    @JoinColumn(name = "terms_id")
+    private TermsDeclaration termsDeclaration;
 }

@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,12 +24,12 @@ public class Plan {
     private Double coverageAmount;
 
     @Column(name = "base_premium")
-    private BigDecimal basePremium;
+    private Double basePremium;
 
     @Column(name = "duration")
     private Integer duration;
 
     @Column(name = "status")
-    private String status; // ACTIVE / INACTIVE
+    private String status;
 
 }

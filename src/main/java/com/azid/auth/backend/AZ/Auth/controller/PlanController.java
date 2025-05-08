@@ -3,7 +3,6 @@ package com.azid.auth.backend.AZ.Auth.controller;
 import com.azid.auth.backend.AZ.Auth.dto.PlanRequestDto;
 import com.azid.auth.backend.AZ.Auth.dto.PlanResponseDto;
 import com.azid.auth.backend.AZ.Auth.service.PlanService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +19,11 @@ public class PlanController {
     private PlanService planService;
 
     @PostMapping("/get-quotationPlan")
-    public ResponseEntity<PlanResponseDto> getQuotationPlan(HttpServletRequest request, @RequestBody @Valid PlanRequestDto requestDto) {
+    public ResponseEntity<PlanResponseDto> getQuotationPlan(
+            @RequestBody @Valid PlanRequestDto requestDto) {
         PlanResponseDto responseDto = planService.generatePlan(requestDto);
         return ResponseEntity.ok(responseDto);
     }
+
+
 }

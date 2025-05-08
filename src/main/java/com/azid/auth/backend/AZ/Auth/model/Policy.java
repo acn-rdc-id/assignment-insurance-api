@@ -1,13 +1,14 @@
 package com.azid.auth.backend.AZ.Auth.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -33,6 +34,15 @@ public class Policy {
     @Column(name = "status")
     private String status; // ACTIVE / CANCELLED / EXPIRED
 
+    @Column(name = "premium_amount")
+    private BigDecimal premiumAmount;
+
+    @Column(name = "premium_mode")
+    private String premiumMode;
+
+    @Column(name = "reference_number")
+    private String referenceNumber;
+
     @ManyToOne
     @JoinColumn(name = "plan_id")
     private Plan plan;
@@ -45,10 +55,4 @@ public class Policy {
     @JoinColumn(name = "payment_id")
     @JsonIgnore
     private Payment payment;
-
-    @OneToOne
-    @JoinColumn(name = "quotation_id", referencedColumnName = "quotation_id", unique = true)
-    @JsonManagedReference
-    private QuotationApplication quotationApplication;
-
 }

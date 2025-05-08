@@ -1,14 +1,12 @@
 package com.azid.auth.backend.AZ.Auth.dtos;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Data
-@Builder
 public class ApiResponseDto<T> {
     private String status;
     private int code;

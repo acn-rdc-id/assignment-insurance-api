@@ -1,9 +1,14 @@
 package com.azid.auth.backend.AZ.Auth.dto;
 
+import com.azid.auth.backend.AZ.Auth.model.Policy;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.util.Date;
 
 @Data
 @NoArgsConstructor
@@ -11,7 +16,11 @@ import lombok.NoArgsConstructor;
 @Builder
 public class PaymentResponseDto {
 
-    private String message;
-    private PolicyResponseDto policy;
-    private PaymentDetailsDto paymentDetails;
+    @JsonIgnoreProperties
+    private Long id;
+    private Date paymentDate;
+    private BigDecimal paymentAmount;
+    private String paymentStatus;
+    private Integer duration;
+    private PolicyDto policy;
 }

@@ -28,7 +28,4 @@ public class DocumentType {
     @Column(name="document_type_is_required")
     private boolean isRequired;
 
-    public boolean getIsRequired() {
-        return isRequired;
-    }
 }

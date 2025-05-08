@@ -1,5 +1,6 @@
 package com.azid.auth.backend.AZ.Auth.service;
 
+import com.azid.auth.backend.AZ.Auth.dto.UserDto;
 import com.azid.auth.backend.AZ.Auth.exceptions.ResourceNotFoundException;
 import com.azid.auth.backend.AZ.Auth.model.User;
 import com.azid.auth.backend.AZ.Auth.repository.UserRepository;
@@ -55,6 +56,4 @@ public class UserService {
         return userRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
-
-
 }

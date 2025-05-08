@@ -1,7 +1,5 @@
 package com.azid.auth.backend.AZ.Auth.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,16 +27,12 @@ public class Payment {
     private BigDecimal paymentAmount;
 
     @Column(name = "payment_status")
-    private String paymentStatus; // SUCCESS / FAILED
+    private String paymentStatus;
 
     @Column(name = "duration")
     private Integer duration;
 
-    @Column(name = "reference_number")
-    private String referenceNumber;
-
     @OneToOne
-    @JoinColumn(name = "quotation_application_id", referencedColumnName = "quotation_id", unique = true)
-    @JsonIgnore
-    private QuotationApplication quotationApplication;
+    @JoinColumn(name = "policy_id")
+    private Policy policy;
 }
