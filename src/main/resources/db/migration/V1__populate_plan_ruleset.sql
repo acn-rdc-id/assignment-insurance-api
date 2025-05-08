@@ -1,5 +1,5 @@
 -- Set active database
-USE training;
+USE mysqldb;
 
 -- Prepopulate PLAN table
 INSERT IGNORE INTO plan (plan_id, plan_name, coverage_amount, base_premium, duration)
