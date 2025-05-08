@@ -1,18 +1,21 @@
 package com.azid.auth.backend.AZ.Auth.controller;
 
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.util.IOUtils;
 import com.azid.auth.backend.AZ.Auth.dto.ClaimInfoResponse;
 import com.azid.auth.backend.AZ.Auth.dto.ClaimResponseDto;
 import com.azid.auth.backend.AZ.Auth.dtos.ApiResponseDto;
+import com.azid.auth.backend.AZ.Auth.service.AwsS3Service;
 import com.azid.auth.backend.AZ.Auth.service.ClaimService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -22,6 +25,9 @@ public class ClaimController {
 
     @Autowired
     ClaimService claimService;
+
+    @Autowired
+    AwsS3Service awsS3Service;
 
     // Endpoint to get list a  claim
     @GetMapping("/list")
@@ -99,7 +105,7 @@ public class ClaimController {
 
             ClaimResponseDto responseDto = claimService.submitClaim(policyID, userID, claimTypeID, files);
             if(responseDto == null) {
-                log.error("No claim policy document found for userId: {}", userID);
+                log.info("Claim policy document fail submitted for userId: {}", userID);
                 apiResponseDto = new ApiResponseDto<>("Error", HttpStatus.NOT_FOUND.value(), "No claim policy document found", null);
             } else {
                 log.info("Claim policy document submitted successfully for userId: {}", userID);
@@ -113,4 +119,23 @@ public class ClaimController {
         }
         return ResponseEntity.ok(apiResponseDto);
     }
+
+    @GetMapping("/download")
+    public ResponseEntity<byte[]> downloadFile(@RequestParam("key") String keyName) {
+        try (S3ObjectInputStream s3is = awsS3Service.downloadFile(keyName))
+        {
+            byte[] content = IOUtils.toByteArray(s3is);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDisposition(ContentDisposition.attachment()
+                    .filename(keyName.substring(keyName.lastIndexOf("/") + 1))
+                    .build());
+
+            return new ResponseEntity<>(content, headers, HttpStatus.OK);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to download file: " + keyName, e);
+        }
+    }
+
 }

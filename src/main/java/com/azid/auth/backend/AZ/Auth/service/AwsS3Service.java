@@ -27,7 +27,7 @@ public class AwsS3Service {
         this.amazonS3 = amazonS3;
     }
 
-    public void uploadFileToS3(String policyID,String folderName, List<MultipartFile> files) {
+    public void uploadFileToS3(long claimId,String policyID,String folderName, List<MultipartFile> files) {
         String folderKey = folderName.endsWith("/") ? rootFolder+folderName : rootFolder+folderName + "/";
 
         // Check if the folder already exists
@@ -35,7 +35,7 @@ public class AwsS3Service {
             amazonS3.putObject(bucketName,folderKey,"");
             for (MultipartFile file : files) {
                 try {
-                    String prefix = policyID+"_";
+                    String prefix = String.valueOf(claimId)+"_"+policyID+"_";
                     String filekey = folderKey + prefix + file.getOriginalFilename();
 
                     ObjectMetadata objectMetadata = new ObjectMetadata();

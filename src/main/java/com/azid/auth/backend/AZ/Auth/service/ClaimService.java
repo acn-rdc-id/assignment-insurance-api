@@ -50,66 +50,78 @@ public class ClaimService {
     //implement the logic to submit claim and upload the document to S3 bucket
     public ClaimResponseDto submitClaim(String policyID, String userID, String claimTypeId, List<MultipartFile> document) {
 
-        // Validate the documents against the claim type & document type
-        validateDocument(document, claimTypeId);
+        try {
+                // Validate the documents against the claim type & document type
+                validateDocument(document, claimTypeId);
 
-       // Implement the logic to submit claim and upload the document to S3 bucket
-        User user = userService.getUserByUserId(userID);
-        String folderName = userID+"_"+user.getUsername()+"_"+policyID;
-        awsS3Service.uploadFileToS3(policyID,folderName, document);
-
-        // Save claim information to the database
-        ClaimType claimtype = getClaimTypeById(Long.valueOf(claimTypeId));
-        Policy policy = getPolicyById(Long.valueOf(policyID));
-        Claim claim = new Claim();
-        claim.setUser(user);
-        claim.setClaimType(claimtype);
-        claim.setPolicy(policy);
-
-        LocalDate date = LocalDate.now();
-        claim.setClaim_date(date);
-        claim.setClaimStatus("Submitted");
-
-        claimRepository.save(claim);
-
-        List<String> urlList = awsS3Service.listFilesByPolicyId(policyID,folderName);
-        log.info("List of url link for Policy ID: {} , urlLink:{}",policyID,urlList.toString());
-
-        List<DocumentType> documentTypeId = documentTypeRepository.findByClaimTypeId(claimTypeId);
-
-        List<ClaimDocument> claimDocumentsList = new ArrayList<>();
-        List<String> documentList = new ArrayList<>();
-
-        for(DocumentType doc : documentTypeId){
-
-            ClaimDocument claimDocument = new ClaimDocument();
-            claimDocument.setClaim(claim);
-
-            for(String url : urlList){
-                if(url.contains(doc.getDocumentTypeName())){
-                    claimDocument.setDocumentType(doc);
-                    claimDocument.setDocumentUrl(url);
-                    documentList.add(url);
+                // Implement the logic to submit claim and upload the document to S3 bucket
+                User user = userService.getUserByUserId(userID);
+                if (user == null) {
+                    throw new RuntimeException("User not found");
                 }
-            }
-            claimDocument.setDocumentUpload(date);
-            claimDocument.setClaim(claim);
 
-            claimDocumentsList.add(claimDocument);
-            claimDocumentRepository.save(claimDocument);
+
+                // Save claim information to the database
+                ClaimType claimtype = getClaimTypeById(Long.valueOf(claimTypeId));
+
+                Policy policy = getPolicyById(Long.valueOf(policyID));
+                Claim claim = new Claim();
+                claim.setUser(user);
+                claim.setClaimType(claimtype);
+                claim.setPolicy(policy);
+
+                LocalDate date = LocalDate.now();
+                claim.setClaim_date(date);
+                claim.setClaimStatus("Submitted");
+
+                claimRepository.save(claim);
+
+                String folderName = userID + "_" + claim.getClaimId() + "_" + policyID;
+                awsS3Service.uploadFileToS3(claim.getClaimId(),policyID, folderName, document);
+                List<String> urlList = awsS3Service.listFilesByPolicyId(policyID, folderName);
+                log.info("List of url link for Policy ID: {} , urlLink:{}", policyID, urlList.toString());
+
+                List<DocumentType> documentTypeId = documentTypeRepository.findByClaimTypeId(claimTypeId);
+                List<Map<String,String>> documentList = new ArrayList<>();
+
+                for (DocumentType doc : documentTypeId) {
+
+                    ClaimDocument claimDocument = new ClaimDocument();
+                    claimDocument.setClaim(claim);
+
+                    for (String url : urlList) {
+                        if (url.contains(doc.getDocumentTypeName())) {
+                            claimDocument.setDocumentType(doc);
+                            claimDocument.setDocumentUrl(url);
+
+                            String documentName = url.substring(url.lastIndexOf("/") + 1);
+                            String[] parts = documentName.split("_");
+                            Map<String,String> documentMap = new HashMap<>();
+                            documentMap.put("documentName", parts[2]);
+                            documentMap.put("documentUrl", url);
+                            documentList.add(documentMap);
+                        }
+                    }
+                    claimDocument.setDocumentUpload(date);
+                    claimDocument.setClaim(claim);
+                    claimDocumentRepository.save(claimDocument);
+                }
+
+                ClaimResponseDto claimResponseDto = new ClaimResponseDto();
+
+                claimResponseDto.setClaimID(claim.getClaimId());
+                claimResponseDto.setPolicyID(policy.getId());
+                claimResponseDto.setDocumentList(documentList);
+                claimResponseDto.setClaimType(claimtype);
+                claimResponseDto.setClaim_date(date);
+                claimResponseDto.setClaimStatus("Submitted");
+
+
+                return claimResponseDto;
+        }catch (Exception e){
+            log.error("Error submitting claim: {}", e.getMessage());
+            throw new RuntimeException("Error submitting claim: " + e.getMessage());
         }
-
-        ClaimResponseDto claimResponseDto = new ClaimResponseDto();
-
-        claimResponseDto.setClaimID(claim.getClaimId());
-        claimResponseDto.setPolicyID(policy.getId());
-        claimResponseDto.setDocumentList(documentList);
-        claimResponseDto.setClaimType(claimtype);
-        claimResponseDto.setClaim_date(date);
-        claimResponseDto.setClaimStatus("Submitted");
-
-
-        return claimResponseDto;
     }
 
 
@@ -180,6 +192,7 @@ public class ClaimService {
     public void validateDocument(List<MultipartFile> documents, String ClaimTypeId){
 
         try {
+            log.info("Validating documents for claim type ID: {}", ClaimTypeId);
             // Check if documents are empty
             if (documents == null || documents.isEmpty()) {
                 throw new RuntimeException("No documents submitted");

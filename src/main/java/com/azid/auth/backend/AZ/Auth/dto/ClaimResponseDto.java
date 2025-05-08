@@ -13,13 +13,14 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class ClaimResponseDto {
 
     private Long claimID;
     private Long policyID;
-    private List<String> documentList;
+    private List<Map<String,String>> documentList;
     private ClaimType claimType;
     private LocalDate claim_date;
     private String claimStatus;
