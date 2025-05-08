@@ -3,11 +3,15 @@ package com.azid.auth.backend.AZ.Auth.service;
 import com.azid.auth.backend.AZ.Auth.dto.PlanDetailsDto;
 import com.azid.auth.backend.AZ.Auth.dto.PlanRequestDto;
 import com.azid.auth.backend.AZ.Auth.dto.PlanResponseDto;
+import com.azid.auth.backend.AZ.Auth.exceptions.BadRequestException;
+import com.azid.auth.backend.AZ.Auth.exceptions.ResourceNotFoundException;
 import com.azid.auth.backend.AZ.Auth.mapper.PlanMapper;
 import com.azid.auth.backend.AZ.Auth.model.Plan;
 import com.azid.auth.backend.AZ.Auth.model.RuleSet;
+import com.azid.auth.backend.AZ.Auth.model.enums.GenderEnum;
 import com.azid.auth.backend.AZ.Auth.repository.PlanRepository;
 import com.azid.auth.backend.AZ.Auth.repository.RuleSetRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 public class PlanService {
     @Autowired
     private RuleSetRepository ruleSetRepository;
@@ -28,52 +33,66 @@ public class PlanService {
     @Autowired
     private PlanMapper planMapper;
 
+    public Plan getPlan(Long id) {
+        return planRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Plan not found"));
+    }
+
     public PlanResponseDto generatePlan(PlanRequestDto request) {
-        LocalDate dob = request.getDateOfBirth();
-        LocalDate today = LocalDate.now();
+        log.info("start [generatePlan] for gender: {}, DOB: {}", request.getGender(), request.getDateOfBirth());
 
-        // TODO: add validation for gender request
-        //String gender = request.getGender().equalsIgnoreCase("male") ? "M" : "F";
+        try {
+            LocalDate dob = request.getDateOfBirth();
+            LocalDate today = LocalDate.now();
 
-        String genderInput = request.getGender();
-        if (genderInput == null || (!genderInput.equalsIgnoreCase("male") && !genderInput.equalsIgnoreCase("female"))) {
-            throw new IllegalArgumentException("Invalid gender. Please provide 'male' or 'female'.");
-        }
-        String gender = genderInput.equalsIgnoreCase("male") ? "M" : "F";
+            GenderEnum gender = request.getGender();
+            String genderCode = gender.getCode();
 
-        int age = Period.between(dob, today).getYears();
-        if (today.getDayOfYear() < dob.withYear(today.getYear()).getDayOfYear()) {
-            age += 1;
-        }
-
-        List<Plan> plans = planRepository.findAll();
-        List<PlanDetailsDto> planDetails = new ArrayList<>();
-
-        for (Plan plan : plans) {
-            Double monthlyPremium = findPremium(plan.getId(), gender, "MONTHLY", age);
-            Double yearlyPremium = findPremium(plan.getId(), gender, "YEARLY", age);
-
-            if (monthlyPremium != null && yearlyPremium != null) {
-                PlanDetailsDto detail = new PlanDetailsDto();
-                detail.setPlanName(plan.getPlanName());
-                detail.setSumAssured(plan.getCoverageAmount());
-                detail.setMonthlyPremium(monthlyPremium);
-                detail.setYearlyPremium(yearlyPremium);
-                detail.setCoverageTerm(plan.getDuration().toString().concat(" years"));
-                planDetails.add(detail);
+            int age = Period.between(dob, today).getYears();
+            if (today.getDayOfYear() < dob.withYear(today.getYear()).getDayOfYear()) {
+                age += 1;
             }
+
+            List<Plan> plans = planRepository.findAll();
+            if (plans.isEmpty()) {
+                throw new ResourceNotFoundException("No plans available for quotation.");
+            }
+
+            List<PlanDetailsDto> planDetails = new ArrayList<>();
+            for (Plan plan : plans) {
+                Double monthlyPremium = findPremium(plan.getId(), genderCode, "MONTHLY", age);
+                Double yearlyPremium = findPremium(plan.getId(), genderCode, "YEARLY", age);
+
+                if (monthlyPremium != null && yearlyPremium != null) {
+                    PlanDetailsDto detail = new PlanDetailsDto();
+                    detail.setId(plan.getId());
+                    detail.setPlanName(plan.getPlanName());
+                    detail.setSumAssured(plan.getCoverageAmount());
+                    detail.setMonthlyPremium(monthlyPremium);
+                    detail.setYearlyPremium(yearlyPremium);
+                    detail.setCoverageTerm(plan.getDuration() + " years");
+                    planDetails.add(detail);
+                }
+            }
+
+            if (planDetails.isEmpty()) {
+                throw new ResourceNotFoundException("No matching plans found for the provided information.");
+            }
+
+            PlanResponseDto response = new PlanResponseDto();
+            response.setReferenceNumber(generateReferenceNumber());
+            response.setGender(gender.name().toLowerCase());
+            response.setDateOfBirth(dob.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            response.setAgeNearestBirthday(age);
+            response.setPlans(planDetails);
+
+            log.info("Plan generated successfully. referenceNumber: {}", response.getReferenceNumber());
+            return response;
+
+        } catch (Exception e) {
+            log.error("Unexpected error during [generatePlan]", e);
+            throw new RuntimeException("Unexpected error occurred while generating plans.");
         }
-
-        // TODO: update if can use mapper
-        PlanResponseDto response = new PlanResponseDto();
-        response.setReferenceNumber(generateReferenceNumber());
-        response.setGender(request.getGender());
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        response.setDateOfBirth(dob.format(dateFormatter));
-        response.setAgeNearestBirthday(age);
-        response.setPlans(planDetails);
-
-        return response;
     }
 
     public Double findPremium(Long planId, String gender, String frequency, int age) {

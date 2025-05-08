@@ -6,6 +6,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
 
 public interface ClaimTypeRepository extends JpaRepository<ClaimType,Long> {
 
@@ -15,6 +18,7 @@ public interface ClaimTypeRepository extends JpaRepository<ClaimType,Long> {
         JOIN document_type dt ON ct.claim_type_id = dt.claim_type_id
     """, nativeQuery = true)
     List<Object[]> getClaimTypesWithDocuments();
+
 
     @Query(value = """
     SELECT ct.claim_type_id, ct.claim_type_name, ct.claim_type_description

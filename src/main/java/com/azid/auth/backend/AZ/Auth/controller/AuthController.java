@@ -41,7 +41,7 @@ public class AuthController {
     public ResponseEntity<?> registerUser(@RequestBody User user) {
         userService.registerUser(user);
 
-        return ResponseEntity.ok(new ApiResponseDto<Map<String, Object>>("Success", HttpStatus.OK.value(), "User registered successfully!", Collections.emptyMap()));
+        return ResponseEntity.ok(new ApiResponseDto<>("Success", HttpStatus.OK.value(), "User registered successfully!", Collections.emptyMap()));
     }
 
     @PostMapping("/login")
@@ -55,6 +55,13 @@ public class AuthController {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String jwtToken = jwtUtils.generateJwtToken(userDetails);
 
-        return ResponseEntity.ok(new ApiResponseDto<Map<String, Object>>("Success", HttpStatus.OK.value(), "User logged in Successfully!", Map.of("token", jwtToken, "email", user.getEmail(), "username", user.getUsername(), "userId", user.getUserId())));
+        Object data = Map.of(
+        "token", jwtToken,
+        "email", user.getEmail(),
+        "username", user.getUsername(),
+        "userId", user.getUserId()
+        );
+
+        return ResponseEntity.ok(new ApiResponseDto<>("Success", HttpStatus.OK.value(), "User logged in Successfully!", data));
     }
 }
