@@ -3,7 +3,10 @@ package com.azid.auth.backend.AZ.Auth.service;
 import com.azid.auth.backend.AZ.Auth.dto.ClaimDto;
 import com.azid.auth.backend.AZ.Auth.dto.ClaimInfoResponse;
 import com.azid.auth.backend.AZ.Auth.dto.ClaimResponseDto;
-import com.azid.auth.backend.AZ.Auth.dto.PolicyResponseDto;
+import com.azid.auth.backend.AZ.Auth.exceptions.ResourceNotFoundException;
+import com.azid.auth.backend.AZ.Auth.mapper.ClaimTypeMapper;
+import com.azid.auth.backend.AZ.Auth.mapper.PolicyMapper;
+import com.azid.auth.backend.AZ.Auth.mapper.UserMapper;
 import com.azid.auth.backend.AZ.Auth.model.*;
 import com.azid.auth.backend.AZ.Auth.repository.*;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 @Slf4j
@@ -42,10 +46,40 @@ public class ClaimService {
     @Autowired
     DocumentTypeRepository documentTypeRepository;
 
+    @Autowired
+    PolicyMapper policyMapper;
+
+    @Autowired
+    UserMapper userMapper;
+
+    @Autowired
+    ClaimTypeMapper claimTypeMapper;
+
 
     //todo : implement the logic to get the list of claim from the database based on user ID
 
     //todo : implement the logic to get the detail of claim from the database based on claim ID and user ID
+    public ClaimDto getClaimDetailsByClaimId(Long claimId,String userId) {
+
+        ClaimDto claimDto = new ClaimDto();
+        User user = userService.getUserByUserId(userId);
+        claimDto.setUserDto(userMapper.toDto(user));
+
+
+        ClaimType claimType = claimTypeRepository.getClaimTypeByClaimId(claimId);
+        claimDto.setClaimType(claimTypeMapper.toDto(claimType));
+
+        Claim claim = claimRepository.findById(claimId)
+                .orElseThrow(() -> new ResourceNotFoundException("Claim not found"));
+
+        claimDto.setPolicy(policyMapper.toDto(claim.getPolicy()));
+        LocalDate claimLocalDate = claim.getClaim_date();
+        claimDto.setClaim_date(Date.from(claimLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        claimDto.setClaimStatus(claim.getClaimStatus());
+
+        return claimDto;
+    }
+
 
     //implement the logic to submit claim and upload the document to S3 bucket
     public ClaimResponseDto submitClaim(String policyID, String userID, String claimTypeId, List<MultipartFile> document) {
@@ -143,7 +177,7 @@ public class ClaimService {
                for (Policy p : policy) {
                    policyIds.add(String.valueOf(p.getId()));
                }
-               log.info("List of policy IDs: {}", policyIds.toString());
+               log.info("List of policy IDs: {}", policyIds);
 
                // Get claim type & required documents
                List<Object[]> rows = claimTypeRepository.getClaimTypesWithDocuments();

@@ -1,7 +1,5 @@
 package com.azid.auth.backend.AZ.Auth.dto;
 
-import com.azid.auth.backend.AZ.Auth.model.Policy;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

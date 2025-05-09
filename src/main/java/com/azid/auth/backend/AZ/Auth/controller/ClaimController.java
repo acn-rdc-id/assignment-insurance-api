@@ -2,9 +2,11 @@ package com.azid.auth.backend.AZ.Auth.controller;
 
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.util.IOUtils;
+import com.azid.auth.backend.AZ.Auth.dto.ClaimDto;
 import com.azid.auth.backend.AZ.Auth.dto.ClaimInfoResponse;
 import com.azid.auth.backend.AZ.Auth.dto.ClaimResponseDto;
 import com.azid.auth.backend.AZ.Auth.dtos.ApiResponseDto;
+import com.azid.auth.backend.AZ.Auth.mapper.ClaimMapper;
 import com.azid.auth.backend.AZ.Auth.service.AwsS3Service;
 import com.azid.auth.backend.AZ.Auth.service.ClaimService;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,9 @@ public class ClaimController {
     @Autowired
     AwsS3Service awsS3Service;
 
+    @Autowired
+    ClaimMapper claimMapper;
+
     // Endpoint to get list a  claim
     @GetMapping("/list")
     public ResponseEntity<ClaimResponseDto> getClaimList() {
@@ -42,11 +47,11 @@ public class ClaimController {
 
     //Endpoint to get detail of claim by claim id
     @GetMapping("/detail/{claimId}")
-    public ResponseEntity<ClaimResponseDto> getClaimDetail(@PathVariable String claimId) {
+    public ResponseEntity<ClaimResponseDto> getClaimDetail(@PathVariable Long claimId, @RequestHeader HttpHeaders httpHeaders ) {
         //todo implement logic to fetch claim detail by claim id
-        ClaimResponseDto responseDto = new ClaimResponseDto();
-
-
+        String userId = httpHeaders.getFirst("userId");
+        ClaimDto claimDto = claimService.getClaimDetailsByClaimId(claimId, userId);
+        ClaimResponseDto responseDto = claimMapper.claimDtoToClaimResponseDTO(claimDto) ;
         return ResponseEntity.ok(responseDto);
     }
 
