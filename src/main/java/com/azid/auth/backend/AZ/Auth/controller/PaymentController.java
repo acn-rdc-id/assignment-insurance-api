@@ -21,6 +21,7 @@ public class PaymentController {
     public ResponseEntity<PaymentResponseDto> handlePayment(@Valid @RequestBody PaymentRequestDto requestDto) {
 
         log.info("PaymentController: handlePayment STARTED");
+        log.info("PaymentController: handlePayment STARTED");
         PaymentResponseDto responseDto = paymentService.handlePayment(requestDto);
         log.info("PaymentController: handlePayment ENDED");
         return ResponseEntity.ok(responseDto);
