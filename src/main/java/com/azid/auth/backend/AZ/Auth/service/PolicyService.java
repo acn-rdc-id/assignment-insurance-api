@@ -3,9 +3,11 @@ package com.azid.auth.backend.AZ.Auth.service;
 import com.azid.auth.backend.AZ.Auth.dto.*;
 import com.azid.auth.backend.AZ.Auth.exceptions.BadRequestException;
 import com.azid.auth.backend.AZ.Auth.exceptions.ResourceNotFoundException;
+import com.azid.auth.backend.AZ.Auth.mapper.BeneficiaryMapper;
 import com.azid.auth.backend.AZ.Auth.mapper.PolicyMapper;
 import com.azid.auth.backend.AZ.Auth.mapper.QuotationApplicationMapper;
 import com.azid.auth.backend.AZ.Auth.model.*;
+import com.azid.auth.backend.AZ.Auth.repository.BeneficiaryRepository;
 import com.azid.auth.backend.AZ.Auth.repository.PolicyRepository;
 import com.azid.auth.backend.AZ.Auth.repository.QuotationApplicationRepository;
 import com.azid.auth.backend.AZ.Auth.repository.UserRepository;
@@ -24,7 +26,9 @@ public class PolicyService {
 
     private final PolicyRepository policyRepository;
     private final QuotationApplicationRepository quotationApplicationRepository;
+    private final BeneficiaryRepository beneficiaryRepository;
     private final PolicyMapper policyMapper;
+    private final BeneficiaryMapper beneficiaryMapper;
     private final QuotationApplicationMapper quotationApplicationMapper;
     private final PlanService planService;
     private final UserService userService;
@@ -32,14 +36,16 @@ public class PolicyService {
 
     public PolicyService(
             PolicyRepository policyRepository,
-            QuotationApplicationRepository quotationApplicationRepository,
-            PolicyMapper policyMapper,
+            QuotationApplicationRepository quotationApplicationRepository, BeneficiaryRepository beneficiaryRepository, BeneficiaryRepository beneficiaryRepository1,
+            PolicyMapper policyMapper, BeneficiaryMapper beneficiaryMapper,
             QuotationApplicationMapper quotationApplicationMapper, UserRepository userRepository,
             PlanService planService, UserService userService, CommonUtils commonUtils) {
 
         this.policyRepository = policyRepository;
         this.quotationApplicationRepository = quotationApplicationRepository;
+        this.beneficiaryRepository = beneficiaryRepository;
         this.policyMapper = policyMapper;
+        this.beneficiaryMapper = beneficiaryMapper;
         this.quotationApplicationMapper = quotationApplicationMapper;
         this.planService = planService;
         this.userService = userService;
@@ -129,6 +135,28 @@ public class PolicyService {
         }
     }
 
+    public BeneficiaryResponseDto createBeneficiary(BeneficiaryRequestDto requestDto) {
+        log.info("start [createBeneficiary] for policy ID: {}", requestDto.getPolicy().getId());
+
+        Policy policy = policyRepository.findById(requestDto.getPolicy().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Policy not found with ID: " + requestDto.getPolicy().getId()));
+
+        Beneficiary beneficiary = new Beneficiary();
+        beneficiary.setBeneficiaryName(requestDto.getBeneficiaryName());
+        beneficiary.setRelationshipToInsured(requestDto.getRelationshipToInsured());
+        beneficiary.setPolicy(policy);
+
+        Beneficiary savedBeneficiary = beneficiaryRepository.save(beneficiary);
+        log.info("[createBeneficiary] Beneficiary saved successfully with ID: {}", savedBeneficiary.getId());
+
+        return BeneficiaryResponseDto.builder()
+                .id(savedBeneficiary.getId())
+                .beneficiaryName(savedBeneficiary.getBeneficiaryName())
+                .relationshipToInsured(savedBeneficiary.getRelationshipToInsured())
+                .policy(beneficiaryMapper.policyToPolicyResponseDTO(savedBeneficiary.getPolicy()))
+                .build();
+    }
+
     private QuotationApplication buildApplicationFromDto(PersonDto personDto, PlanInfoDto planInfoDto) {
         QuotationApplication application = new QuotationApplication();
 
@@ -144,7 +172,7 @@ public class PolicyService {
         application.setPhoneNo(personDto.getPhoneNo());
         application.setEmail(personDto.getEmail());
         application.setDateOfBirth(personDto.getDateOfBirth());
-        application.setSmoker(Boolean.TRUE.equals(personDto.getIsSmoker()));
+        application.setSmoker(personDto.isSmoker());
         application.setUsPerson(Boolean.TRUE.equals(personDto.getIsUsPerson()));
         application.setCigarettesNo(personDto.getCigarettesNo());
         application.setOccupation(personDto.getOccupation());

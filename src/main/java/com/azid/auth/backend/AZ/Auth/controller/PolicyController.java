@@ -1,8 +1,6 @@
 package com.azid.auth.backend.AZ.Auth.controller;
 
-import com.azid.auth.backend.AZ.Auth.dto.PolicyResponseDto;
-import com.azid.auth.backend.AZ.Auth.dto.QuotationApplicationRequestDto;
-import com.azid.auth.backend.AZ.Auth.dto.QuotationApplicationResponseDto;
+import com.azid.auth.backend.AZ.Auth.dto.*;
 import com.azid.auth.backend.AZ.Auth.dtos.ApiResponseDto;
 import com.azid.auth.backend.AZ.Auth.exceptions.ErrorResponse;
 import com.azid.auth.backend.AZ.Auth.service.PolicyService;
@@ -63,6 +61,15 @@ public class PolicyController {
         QuotationApplicationResponseDto responseDto = policyService.createApplication(dto, userId);
 
         log.info("PolicyController: createApplication ENDED");
+
+        return ResponseEntity.ok(new ApiResponseDto<>("Success", HttpStatus.OK.value(), "Application Created Successfully!", responseDto).getData());
+    }
+
+    @PostMapping("/create-beneficiary")
+    public ResponseEntity<BeneficiaryResponseDto> createBeneficiary(@Valid @RequestBody BeneficiaryRequestDto dto, @RequestHeader HttpHeaders httpHeaders) {
+
+        String userId = httpHeaders.getFirst("userId");
+        BeneficiaryResponseDto responseDto = policyService.createBeneficiary(dto);
 
         return ResponseEntity.ok(new ApiResponseDto<>("Success", HttpStatus.OK.value(), "Application Created Successfully!", responseDto).getData());
     }
