@@ -181,5 +181,17 @@ public class PolicyService {
         quotationApplicationRepository.save(application);
     }
 
+    public PolicyResponseDto updatePolicy(Long id, PolicyServicingDto policyServicingDto) {
+        log.info("Updating policy ID: {}", id);
+
+        Policy policy =  policyRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(("Policy Not Found with ID " + id)));
+
+        policyMapper.updatePolicy(policy, policyServicingDto);
+
+        Policy updatedPolicy = policyRepository.save(policy);
+
+        return policyMapper.policyToPolicyResponseDTO(updatedPolicy);
+    }
 
 }
