@@ -172,7 +172,7 @@ public class PolicyService {
     }
 
     public void updateStatusAndPayment(Long applicationId, String status, Payment payment) {
-        log.info("[updateStatusAndPayment] application ID: {}, payment ID: {}", applicationId, payment.getId());
+        log.info("[updateStatusAndPayment] application ID: {}, payment ID: {}", applicationId, payment!=null ? payment.getId():null);
         QuotationApplication application = getQuotationApplication(applicationId);
         application.setApplicationStatus(status);
         if (Objects.nonNull(payment)) {
