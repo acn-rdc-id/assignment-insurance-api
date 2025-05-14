@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,4 +22,5 @@ public class PolicyResponseDto {
     private Date endDate;
     private QuotationApplicationResponseDto applicationResponseDto;
     private String status;
+    private List<BeneficiaryDto> beneficiaryList;
 }
