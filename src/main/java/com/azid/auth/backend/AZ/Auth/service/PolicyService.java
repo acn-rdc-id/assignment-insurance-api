@@ -191,6 +191,8 @@ public class PolicyService {
 
         Policy updatedPolicy = policyRepository.save(policy);
 
+        log.info("Policy ID: {} updated successfully", id);
+
         return policyMapper.policyToPolicyResponseDTO(updatedPolicy);
     }
 

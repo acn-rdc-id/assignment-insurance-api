@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 public class PolicyServicingDto {
     private String fullName;
     private String nationality;
-    private String identificationNo;
     private String countryOfBirth;
     private String phoneNo;
     private String email;
