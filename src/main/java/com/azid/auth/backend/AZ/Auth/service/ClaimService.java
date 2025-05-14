@@ -59,22 +59,34 @@ public class ClaimService {
     //todo : implement the logic to get the list of claim from the database based on user ID
 
     //todo : implement the logic to get the detail of claim from the database based on claim ID and user ID
-    public ClaimDto getClaimDetailsByClaimId(Long claimId,String userId) {
+    public ClaimResponseDto getClaimDetailsByClaimId(Long claimId,String userId) {
 
-        ClaimDto claimDto = new ClaimDto();
-        User user = userService.getUserByUserId(userId);
-        claimDto.setUserDto(userMapper.toDto(user));
-
+        ClaimResponseDto claimDto = new ClaimResponseDto();
+//        User user = userService.getUserByUserId(userId);
+//        claimDto.setUserDto(userMapper.toDto(user));
 
         ClaimType claimType = claimTypeRepository.getClaimTypeByClaimId(claimId);
-        claimDto.setClaimType(claimTypeMapper.toDto(claimType));
+        claimDto.setClaimType(claimType);
 
         Claim claim = claimRepository.findById(claimId)
                 .orElseThrow(() -> new ResourceNotFoundException("Claim not found"));
 
-        claimDto.setPolicy(policyMapper.toDto(claim.getPolicy()));
-        LocalDate claimLocalDate = claim.getClaim_date();
-        claimDto.setClaim_date(Date.from(claimLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        List<ClaimDocument> documentList = claimDocumentRepository.getClaimDocumentByClaimId(claimId);
+        if (documentList == null || documentList.isEmpty()) {
+            throw new ResourceNotFoundException("Claim Document not found");
+        }
+
+        List<Map<String,String>> documentListMap = new ArrayList<>();
+        for (ClaimDocument doc : documentList) {
+            Map<String,String> documentMap = new HashMap<>();
+            documentMap.put("documentName", doc.getDocumentType().getDocumentTypeName());
+            documentMap.put("documentUrl", doc.getDocumentUrl());
+            documentListMap.add(documentMap);
+        }
+
+        claimDto.setDocumentList(documentListMap);
+        claimDto.setPolicyID(Long.valueOf(claim.getPolicy().getPolicyNo()));
+        claimDto.setClaim_date(claim.getClaim_date());
         claimDto.setClaimStatus(claim.getClaimStatus());
 
         return claimDto;

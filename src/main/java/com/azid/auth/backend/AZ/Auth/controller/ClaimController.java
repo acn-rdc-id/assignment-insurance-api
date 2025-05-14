@@ -47,12 +47,21 @@ public class ClaimController {
 
     //Endpoint to get detail of claim by claim id
     @GetMapping("/detail/{claimId}")
-    public ResponseEntity<ClaimResponseDto> getClaimDetail(@PathVariable Long claimId, @RequestHeader HttpHeaders httpHeaders ) {
+    public ResponseEntity<ApiResponseDto<ClaimResponseDto>> getClaimDetail(@PathVariable Long claimId, @RequestHeader HttpHeaders httpHeaders) {
         //todo implement logic to fetch claim detail by claim id
-        String userId = httpHeaders.getFirst("userId");
-        ClaimDto claimDto = claimService.getClaimDetailsByClaimId(claimId, userId);
-        ClaimResponseDto responseDto = claimMapper.claimDtoToClaimResponseDTO(claimDto) ;
-        return ResponseEntity.ok(responseDto);
+        ApiResponseDto<ClaimResponseDto> apiResponseDto = null;
+
+        try {
+            String userId = httpHeaders.getFirst("userId");
+            ClaimResponseDto responseDto = claimService.getClaimDetailsByClaimId(claimId, userId);
+            responseDto.setClaimID(claimId);
+
+            apiResponseDto = new ApiResponseDto<>("Success", HttpStatus.OK.value(), "Claim Policy Document Retrieved Successfully!", responseDto);
+        } catch (Exception e) {
+            log.error("Error occurred while validating input parameters for get claim details: {}", e.getMessage());
+            apiResponseDto = new ApiResponseDto<>("Error", HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error", null);
+        }
+        return ResponseEntity.ok(apiResponseDto);
     }
 
     @GetMapping("/claimpolicydocument/{userId}")
@@ -68,7 +77,7 @@ public class ClaimController {
 
             log.info("Fetching claim policy document for userId: {}", userId);
             ClaimInfoResponse claimInfoResponse = claimService.getClaimInfoByUserId(userId);
-            if(claimInfoResponse == null) {
+            if (claimInfoResponse == null) {
                 log.error("No claim policy document found for userId: {}", userId);
                 apiResponseDto = new ApiResponseDto<>("Error", HttpStatus.NOT_FOUND.value(), "No claim policy document found", null);
             } else {
@@ -77,7 +86,7 @@ public class ClaimController {
                 apiResponseDto = new ApiResponseDto<>("Success", HttpStatus.OK.value(), "Claim Policy Document Retrieved Successfully!", claimInfoResponse);
             }
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("Error occurred while retrieving claim policy document for userId: {}. Error: {}", userId, e.getMessage());
             apiResponseDto = new ApiResponseDto<>("Error", HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error", null);
         }
@@ -88,13 +97,13 @@ public class ClaimController {
 
     @PostMapping("/submit")
     public ResponseEntity<ApiResponseDto<ClaimInfoResponse>> submitClaim(@RequestParam("policyID") String policyID,
-                                                        @RequestParam("userID") String userID,
-                                                        @RequestParam("claimTypeID") String claimTypeID,
-                                                        @RequestPart("files") List<MultipartFile> files) {
-        ApiResponseDto  apiResponseDto = null;
+                                                                         @RequestParam("userID") String userID,
+                                                                         @RequestParam("claimTypeID") String claimTypeID,
+                                                                         @RequestPart("files") List<MultipartFile> files) {
+        ApiResponseDto apiResponseDto = null;
 
         log.info("Start process for submit claim policy document for userId: {}", userID);
-        try{
+        try {
             if (policyID == null || policyID.isEmpty()) {
                 log.error("Policy ID is null or empty");
                 apiResponseDto = new ApiResponseDto<>("Error", HttpStatus.BAD_REQUEST.value(), "Policy ID cannot be null or empty", null);
@@ -109,7 +118,7 @@ public class ClaimController {
             }
 
             ClaimResponseDto responseDto = claimService.submitClaim(policyID, userID, claimTypeID, files);
-            if(responseDto == null) {
+            if (responseDto == null) {
                 log.info("Claim policy document fail submitted for userId: {}", userID);
                 apiResponseDto = new ApiResponseDto<>("Error", HttpStatus.NOT_FOUND.value(), "No claim policy document found", null);
             } else {
@@ -117,8 +126,7 @@ public class ClaimController {
                 log.info("End process for submit claim policy document");
                 apiResponseDto = new ApiResponseDto<>("Success", HttpStatus.OK.value(), "Claim Policy Document Submitted Successfully!", responseDto);
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("Error occurred while validating input parameters for claim submission: {}", e.getMessage());
             apiResponseDto = new ApiResponseDto<>("Error", HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error", null);
         }
@@ -127,8 +135,7 @@ public class ClaimController {
 
     @GetMapping("/download")
     public ResponseEntity<byte[]> downloadFile(@RequestParam("key") String keyName) {
-        try (S3ObjectInputStream s3is = awsS3Service.downloadFile(keyName))
-        {
+        try (S3ObjectInputStream s3is = awsS3Service.downloadFile(keyName)) {
             byte[] content = IOUtils.toByteArray(s3is);
 
             HttpHeaders headers = new HttpHeaders();
