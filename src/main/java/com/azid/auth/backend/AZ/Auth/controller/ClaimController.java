@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -64,10 +65,11 @@ public class ClaimController {
         return ResponseEntity.ok(apiResponseDto);
     }
 
-    @GetMapping("/claimpolicydocument/{userId}")
-    public ResponseEntity<ApiResponseDto<ClaimInfoResponse>> getPolicyByUserId(@PathVariable String userId) {
+    @PostMapping("/claimpolicydocument")
+    public ResponseEntity<ApiResponseDto<ClaimInfoResponse>> getPolicyByUserId(@RequestBody Map<String, String> request) {
         ApiResponseDto<ClaimInfoResponse> apiResponseDto = null;
 
+        String userId = request.get("userId");
         log.info("Start process for get claim policy document for userId: {}", userId);
         try {
             if (userId == null || userId.isEmpty()) {
@@ -77,7 +79,7 @@ public class ClaimController {
 
             log.info("Fetching claim policy document for userId: {}", userId);
             ClaimInfoResponse claimInfoResponse = claimService.getClaimInfoByUserId(userId);
-            if (claimInfoResponse == null) {
+            if(claimInfoResponse == null) {
                 log.error("No claim policy document found for userId: {}", userId);
                 apiResponseDto = new ApiResponseDto<>("Error", HttpStatus.NOT_FOUND.value(), "No claim policy document found", null);
             } else {
@@ -86,7 +88,7 @@ public class ClaimController {
                 apiResponseDto = new ApiResponseDto<>("Success", HttpStatus.OK.value(), "Claim Policy Document Retrieved Successfully!", claimInfoResponse);
             }
 
-        } catch (Exception e) {
+        }catch (Exception e) {
             log.error("Error occurred while retrieving claim policy document for userId: {}. Error: {}", userId, e.getMessage());
             apiResponseDto = new ApiResponseDto<>("Error", HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error", null);
         }
@@ -103,7 +105,7 @@ public class ClaimController {
         ApiResponseDto apiResponseDto = null;
 
         log.info("Start process for submit claim policy document for userId: {}", userID);
-        try {
+        try{
             if (policyID == null || policyID.isEmpty()) {
                 log.error("Policy ID is null or empty");
                 apiResponseDto = new ApiResponseDto<>("Error", HttpStatus.BAD_REQUEST.value(), "Policy ID cannot be null or empty", null);
@@ -118,7 +120,7 @@ public class ClaimController {
             }
 
             ClaimResponseDto responseDto = claimService.submitClaim(policyID, userID, claimTypeID, files);
-            if (responseDto == null) {
+            if(responseDto == null) {
                 log.info("Claim policy document fail submitted for userId: {}", userID);
                 apiResponseDto = new ApiResponseDto<>("Error", HttpStatus.NOT_FOUND.value(), "No claim policy document found", null);
             } else {
@@ -126,16 +128,26 @@ public class ClaimController {
                 log.info("End process for submit claim policy document");
                 apiResponseDto = new ApiResponseDto<>("Success", HttpStatus.OK.value(), "Claim Policy Document Submitted Successfully!", responseDto);
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             log.error("Error occurred while validating input parameters for claim submission: {}", e.getMessage());
             apiResponseDto = new ApiResponseDto<>("Error", HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error", null);
         }
         return ResponseEntity.ok(apiResponseDto);
     }
 
-    @GetMapping("/download")
-    public ResponseEntity<byte[]> downloadFile(@RequestParam("key") String keyName) {
-        try (S3ObjectInputStream s3is = awsS3Service.downloadFile(keyName)) {
+    @PostMapping("/download")
+    public ResponseEntity<byte[]> downloadFile(@RequestBody Map<String, String> request) {
+
+        String keyName = request.get("keyName");
+        log.info("Start process for download file from S3: {}", keyName);
+        if (keyName == null || keyName.isEmpty()) {
+            log.error("Key name is null or empty");
+            return ResponseEntity.badRequest().body("Key name cannot be null or empty".getBytes());
+        }
+        log.info("Downloading file from S3: {}", keyName);
+        try (S3ObjectInputStream s3is = awsS3Service.downloadFile(keyName))
+        {
             byte[] content = IOUtils.toByteArray(s3is);
 
             HttpHeaders headers = new HttpHeaders();

@@ -118,7 +118,7 @@ public class ClaimService {
 
                 LocalDate date = LocalDate.now();
                 claim.setClaim_date(date);
-                claim.setClaimStatus("Submitted");
+                claim.setClaimStatus("Pending");
 
                 claimRepository.save(claim);
 
@@ -160,7 +160,7 @@ public class ClaimService {
                 claimResponseDto.setDocumentList(documentList);
                 claimResponseDto.setClaimType(claimtype);
                 claimResponseDto.setClaim_date(date);
-                claimResponseDto.setClaimStatus("Submitted");
+                claimResponseDto.setClaimStatus(claim.getClaimStatus());
 
 
                 return claimResponseDto;
