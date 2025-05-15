@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -50,10 +51,11 @@ public class ClaimController {
         return ResponseEntity.ok(responseDto);
     }
 
-    @GetMapping("/claimpolicydocument/{userId}")
-    public ResponseEntity<ApiResponseDto<ClaimInfoResponse>> getPolicyByUserId(@PathVariable String userId) {
+    @PostMapping("/claimpolicydocument")
+    public ResponseEntity<ApiResponseDto<ClaimInfoResponse>> getPolicyByUserId(@RequestBody Map<String, String> request) {
         ApiResponseDto<ClaimInfoResponse> apiResponseDto = null;
 
+        String userId = request.get("userId");
         log.info("Start process for get claim policy document for userId: {}", userId);
         try {
             if (userId == null || userId.isEmpty()) {
@@ -120,8 +122,16 @@ public class ClaimController {
         return ResponseEntity.ok(apiResponseDto);
     }
 
-    @GetMapping("/download")
-    public ResponseEntity<byte[]> downloadFile(@RequestParam("key") String keyName) {
+    @PostMapping("/download")
+    public ResponseEntity<byte[]> downloadFile(@RequestBody Map<String, String> request) {
+
+        String keyName = request.get("keyName");
+        log.info("Start process for download file from S3: {}", keyName);
+        if (keyName == null || keyName.isEmpty()) {
+            log.error("Key name is null or empty");
+            return ResponseEntity.badRequest().body("Key name cannot be null or empty".getBytes());
+        }
+        log.info("Downloading file from S3: {}", keyName);
         try (S3ObjectInputStream s3is = awsS3Service.downloadFile(keyName))
         {
             byte[] content = IOUtils.toByteArray(s3is);
