@@ -20,5 +20,5 @@ public interface PolicyMapper {
     PolicyResponseDto policyToPolicyResponseDTO(Policy policy);
 
     @Mapping(target = "id", ignore = true)
-    void updatePolicy(@MappingTarget Policy target, PolicyServicingDto source);
+    void updatePolicyQuotationApplication(@MappingTarget QuotationApplication target, PolicyServicingDto source);
 }

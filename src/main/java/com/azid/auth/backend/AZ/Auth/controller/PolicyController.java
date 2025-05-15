@@ -70,15 +70,15 @@ public class PolicyController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<PolicyResponseDto> updatePolicy(@Valid @PathVariable Long id, @RequestBody PolicyServicingDto dto, @RequestHeader HttpHeaders httpHeaders) {
+    public ResponseEntity<?> updatePolicy(@Valid @PathVariable Long id, @RequestBody PolicyServicingDto dto, @RequestHeader HttpHeaders httpHeaders) {
 
         log.info("PolicyController: updatePolicyServicing STARTED");
 
-        PolicyResponseDto responseDto = policyService.updatePolicy(id, dto);
+        QuotationApplicationResponseDto responseDto = policyService.updatePolicy(id, dto);
 
         log.info("PolicyController: updatePolicyServicing ENDED");
 
-        return ResponseEntity.ok(new ApiResponseDto<>("Success", HttpStatus.OK.value(), "", responseDto).getData());
+        return ResponseEntity.ok(new ApiResponseDto<>("Success", HttpStatus.OK.value(), "", responseDto));
     }
 
 }
