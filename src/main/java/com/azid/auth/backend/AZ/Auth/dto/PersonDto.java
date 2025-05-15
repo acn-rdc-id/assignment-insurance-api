@@ -46,7 +46,7 @@ public class PersonDto {
     public Date dateOfBirth;
 
     @NotNull
-    public Boolean isSmoker;
+    public boolean isSmoker;
 
     public String countryOfBirth;
     public Integer cigarettesNo;
