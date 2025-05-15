@@ -1,5 +1,6 @@
 package com.azid.auth.backend.AZ.Auth.dto;
 
+import com.azid.auth.backend.AZ.Auth.model.Plan;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,14 +18,16 @@ public class QuotationApplicationResponseDto {
     public String gender;
     public String nationality;
     public String identificationNo;
+    public String countryCode;
     public String countryOfBirth;
     public String phoneNo;
     public String email;
+    public String title;
     public Date dateOfBirth;
     public boolean isSmoker;
     public Integer cigarettesNo;
     public String occupation;
     public String purposeOfTransaction;
     public String applicationStatus;
-    public PlanInfoDto planResponseDto;
+    public Plan plan;
 }
