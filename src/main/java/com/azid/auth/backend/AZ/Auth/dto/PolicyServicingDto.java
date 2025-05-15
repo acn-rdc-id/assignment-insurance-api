@@ -8,10 +8,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PolicyServicingDto {
+    private String title;
     private String fullName;
-    private String nationality;
-    private String countryOfBirth;
+    private String countryCode;
     private String phoneNo;
     private String email;
-    private String occupation;
 }
