@@ -1,4 +1,6 @@
 package com.azid.auth.backend.AZ.Auth.controller;
+import com.azid.auth.backend.AZ.Auth.dto.ClaimListResponseDto;
+import com.azid.auth.backend.AZ.Auth.dtos.ApiResponseDto;
 
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.util.IOUtils;
@@ -37,12 +39,12 @@ public class ClaimController {
 
     // Endpoint to get list a  claim
     @GetMapping("/list")
-    public ResponseEntity<ClaimResponseDto> getClaimList() {
+    public ResponseEntity<List<ClaimListResponseDto>> getClaimList(@RequestHeader HttpHeaders httpHeaders) {
         //todo implement logic to fetch claim list
-        ClaimResponseDto responseDto = new ClaimResponseDto();
-
-
-        return ResponseEntity.ok(responseDto);
+        String userId = httpHeaders.getFirst("userId");
+        log.info(userId);
+        List<ClaimListResponseDto> claimList = claimService.getAllClaims(userId);
+        return ResponseEntity.ok(new ApiResponseDto<>("Success", HttpStatus.OK.value(), "Claim List retrieved Successfully!", claimList).getData());
     }
 
 

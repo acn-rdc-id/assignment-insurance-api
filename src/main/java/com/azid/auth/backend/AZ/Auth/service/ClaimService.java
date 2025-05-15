@@ -2,6 +2,7 @@ package com.azid.auth.backend.AZ.Auth.service;
 
 import com.azid.auth.backend.AZ.Auth.dto.ClaimDto;
 import com.azid.auth.backend.AZ.Auth.dto.ClaimInfoResponse;
+import com.azid.auth.backend.AZ.Auth.dto.ClaimListResponseDto;
 import com.azid.auth.backend.AZ.Auth.dto.ClaimResponseDto;
 import com.azid.auth.backend.AZ.Auth.exceptions.ResourceNotFoundException;
 import com.azid.auth.backend.AZ.Auth.mapper.ClaimTypeMapper;
@@ -57,6 +58,22 @@ public class ClaimService {
 
 
     //todo : implement the logic to get the list of claim from the database based on user ID
+    public List<ClaimListResponseDto> getAllClaims(String userId) {
+        log.info("start userid check {}", userId);
+        return claimRepository.findByUserUserId(userId)
+                .stream()
+                .map(claim -> {
+                    ClaimListResponseDto dto = new ClaimListResponseDto();
+                    dto.setClaimId(claim.getClaimId());
+                    dto.setPolicyId(claim.getPolicy() != null ? claim.getPolicy().getId() : null);
+                    dto.setClaim_date(claim.getClaim_date());
+                    dto.setClaimStatus(claim.getClaimStatus());
+                    dto.setClaimTypeId(claim.getClaimType() != null ? claim.getClaimType().getClaimTypeId() : null);
+
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
 
     //todo : implement the logic to get the detail of claim from the database based on claim ID and user ID
     public ClaimResponseDto getClaimDetailsByClaimId(Long claimId,String userId) {
