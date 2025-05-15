@@ -18,7 +18,7 @@ public class Beneficiary {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "policy_id", referencedColumnName = "policy_id", unique = true)
+    @JoinColumn(name = "policy_id", referencedColumnName = "policy_id")
     private Policy policy;
 
     @Column(name = "beneficiary_name")

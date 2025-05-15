@@ -17,4 +17,5 @@ public class PaymentDetailsDto {
     private Date paymentDate;
     private BigDecimal paymentAmount;
     private String paymentStatus;
+    private String paymentReferenceNumber;
 }

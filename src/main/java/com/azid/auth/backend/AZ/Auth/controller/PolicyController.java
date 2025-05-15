@@ -1,8 +1,6 @@
 package com.azid.auth.backend.AZ.Auth.controller;
 
-import com.azid.auth.backend.AZ.Auth.dto.PolicyResponseDto;
-import com.azid.auth.backend.AZ.Auth.dto.QuotationApplicationRequestDto;
-import com.azid.auth.backend.AZ.Auth.dto.QuotationApplicationResponseDto;
+import com.azid.auth.backend.AZ.Auth.dto.*;
 import com.azid.auth.backend.AZ.Auth.dtos.ApiResponseDto;
 import com.azid.auth.backend.AZ.Auth.exceptions.ErrorResponse;
 import com.azid.auth.backend.AZ.Auth.service.PolicyService;
@@ -67,4 +65,16 @@ public class PolicyController {
         return ResponseEntity.ok(new ApiResponseDto<>("Success", HttpStatus.OK.value(), "Application Created Successfully!", responseDto).getData());
     }
 
+    @PostMapping("/beneficiary")
+    public ResponseEntity<ApiResponseDto<BeneficiaryResponseDto>> upsertAll(@Valid @RequestBody BeneficiaryRequestDto req, @RequestHeader HttpHeaders httpHeaders) {
+
+        log.info("PolicyController: upsertAll beneficiaries for policyId={}", req.getPolicyNo());
+        String userId = httpHeaders.getFirst("userId");
+        BeneficiaryResponseDto result = policyService.upsertAll(req, userId);
+        log.info("PolicyController: upsertAll ENDED");
+
+        return ResponseEntity.ok(
+                new ApiResponseDto<>("Success", HttpStatus.OK.value(),"Beneficiaries processed successfully", result)
+        );
+    }
 }
