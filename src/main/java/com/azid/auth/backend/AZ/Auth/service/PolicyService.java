@@ -196,7 +196,25 @@ public class PolicyService {
         quotationApplicationRepository.save(application);
     }
 
+
     private static final int MAX_BENEFICIARIES = 2;
+
+    public QuotationApplicationResponseDto updatePolicy(Long id, PolicyServicingDto policyServicingDto) {
+        log.info("Updating policy ID: {}", id);
+
+        Policy policy =  policyRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(("Policy Not Found with ID " + id)));
+
+        QuotationApplication quotationApplication = policy.getQuotationApplication();
+
+        policyMapper.updatePolicyQuotationApplication(quotationApplication, policyServicingDto);
+
+        QuotationApplication updatedPolicyQuotationApplication = quotationApplicationRepository.save(quotationApplication);
+
+        log.info("Policy ID: {} updated successfully", id);
+
+        return quotationApplicationMapper.toResponseDto(updatedPolicyQuotationApplication);
+    }
 
     public BeneficiaryResponseDto upsertAll(BeneficiaryRequestDto req, String userId) {
         Policy policy = policyRepository.findByUserId(userId).stream()
