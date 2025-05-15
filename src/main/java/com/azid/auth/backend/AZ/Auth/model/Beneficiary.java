@@ -17,7 +17,8 @@ public class Beneficiary {
     @Column(name = "beneficiary_id")
     private Long id;
 
-    @OneToOne
+    @ManyToOne
+    @JoinColumn(name = "policy_id", referencedColumnName = "policy_id", unique = true)
     private Policy policy;
 
     @Column(name = "beneficiary_name")
@@ -25,4 +26,7 @@ public class Beneficiary {
 
     @Column(name = "relationship_to_insured")
     private String relationshipToInsured;
+
+    @Column(name = "share")
+    private Float share;
 }
