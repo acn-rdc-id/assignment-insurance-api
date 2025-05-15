@@ -3,9 +3,11 @@ package com.azid.auth.backend.AZ.Auth.service;
 import com.azid.auth.backend.AZ.Auth.dto.*;
 import com.azid.auth.backend.AZ.Auth.exceptions.BadRequestException;
 import com.azid.auth.backend.AZ.Auth.exceptions.ResourceNotFoundException;
+import com.azid.auth.backend.AZ.Auth.mapper.BeneficiaryMapper;
 import com.azid.auth.backend.AZ.Auth.mapper.PolicyMapper;
 import com.azid.auth.backend.AZ.Auth.mapper.QuotationApplicationMapper;
 import com.azid.auth.backend.AZ.Auth.model.*;
+import com.azid.auth.backend.AZ.Auth.repository.BeneficiaryRepository;
 import com.azid.auth.backend.AZ.Auth.repository.PolicyRepository;
 import com.azid.auth.backend.AZ.Auth.repository.QuotationApplicationRepository;
 import com.azid.auth.backend.AZ.Auth.repository.UserRepository;
@@ -13,6 +15,7 @@ import com.azid.auth.backend.AZ.Auth.utils.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -26,6 +29,8 @@ public class PolicyService {
     private final QuotationApplicationRepository quotationApplicationRepository;
     private final PolicyMapper policyMapper;
     private final QuotationApplicationMapper quotationApplicationMapper;
+    private final BeneficiaryMapper beneficiaryMapper;
+    private final BeneficiaryRepository beneficiaryRepository;
     private final PlanService planService;
     private final UserService userService;
     private final CommonUtils commonUtils;
@@ -35,7 +40,8 @@ public class PolicyService {
             QuotationApplicationRepository quotationApplicationRepository,
             PolicyMapper policyMapper,
             QuotationApplicationMapper quotationApplicationMapper, UserRepository userRepository,
-            PlanService planService, UserService userService, CommonUtils commonUtils) {
+            PlanService planService, UserService userService, CommonUtils commonUtils,
+            BeneficiaryMapper beneficiaryMapper, BeneficiaryRepository beneficiaryRepository) {
 
         this.policyRepository = policyRepository;
         this.quotationApplicationRepository = quotationApplicationRepository;
@@ -44,6 +50,8 @@ public class PolicyService {
         this.planService = planService;
         this.userService = userService;
         this.commonUtils = commonUtils;
+        this.beneficiaryMapper = beneficiaryMapper;
+        this.beneficiaryRepository = beneficiaryRepository;
     }
 
     public List<PolicyResponseDto> getAllPolicies(String userId) {
@@ -81,6 +89,17 @@ public class PolicyService {
         log.info("[constructPolicyResponseDto] applicationResponseDto: {}", applicationResponseDto);
         applicationResponseDto.setPlanResponseDto(planInfoDto);
         policyResponseDto.setApplicationResponseDto(applicationResponseDto);
+
+        List<Beneficiary> beneficiaries = beneficiaryRepository.findByPolicyId(policy.getId());
+        if (beneficiaries == null || beneficiaries.isEmpty()) {
+            policyResponseDto.setBeneficiaryList(Collections.emptyList());
+        } else {
+            List<BeneficiaryDto> beneficiaryDtos = beneficiaries.stream()
+                    .map(beneficiaryMapper::toDto)
+                    .collect(Collectors.toList());
+            policyResponseDto.setBeneficiaryList(beneficiaryDtos);
+        }
+
         return policyResponseDto;
     }
 
@@ -172,7 +191,7 @@ public class PolicyService {
     }
 
     public void updateStatusAndPayment(Long applicationId, String status, Payment payment) {
-        log.info("[updateStatusAndPayment] application ID: {}, payment ID: {}", applicationId, payment.getId());
+        log.info("[updateStatusAndPayment] application ID: {}, payment ID: {}", applicationId, payment!=null ? payment.getId():null);
         QuotationApplication application = getQuotationApplication(applicationId);
         application.setApplicationStatus(status);
         if (Objects.nonNull(payment)) {
