@@ -39,19 +39,32 @@ public class ClaimController {
 
     // Endpoint to get list a  claim
     @GetMapping("/list")
-    public ResponseEntity<List<ClaimListResponseDto>> getClaimList(@RequestHeader HttpHeaders httpHeaders) {
-        //todo implement logic to fetch claim list
+    public ResponseEntity<ApiResponseDto<List<ClaimListResponseDto>>> getClaimList(@RequestHeader HttpHeaders httpHeaders) {
+
         String userId = httpHeaders.getFirst("userId");
-        log.info(userId);
-        List<ClaimListResponseDto> claimList = claimService.getAllClaims(userId);
-        return ResponseEntity.ok(new ApiResponseDto<>("Success", HttpStatus.OK.value(), "Claim List retrieved Successfully!", claimList).getData());
+        log.info("Retrieving claim list for userId: {}", userId);
+
+        ApiResponseDto<List<ClaimListResponseDto>> apiResponseDto = null;
+        try{
+            if (userId == null || userId.isEmpty()) {
+                log.error("User ID is null or empty");
+                apiResponseDto = new ApiResponseDto<>("Error", HttpStatus.BAD_REQUEST.value(), "User ID cannot be null or empty", null);
+            }else{
+                List<ClaimListResponseDto> claimList = claimService.getAllClaims(userId);
+                apiResponseDto = new ApiResponseDto<>("Success", HttpStatus.OK.value(), "Claim List retrieved Successfully!", claimList);
+            }
+        }catch (Exception e){
+            log.error("Error occurred while retrieving claim list: {}", e.getMessage());
+            apiResponseDto = new ApiResponseDto<>("Error", HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error", null);
+        }
+
+        return ResponseEntity.ok(apiResponseDto);
     }
 
 
     //Endpoint to get detail of claim by claim id
     @GetMapping("/detail/{claimId}")
     public ResponseEntity<ApiResponseDto<ClaimResponseDto>> getClaimDetail(@PathVariable Long claimId, @RequestHeader HttpHeaders httpHeaders) {
-        //todo implement logic to fetch claim detail by claim id
         ApiResponseDto<ClaimResponseDto> apiResponseDto = null;
 
         try {

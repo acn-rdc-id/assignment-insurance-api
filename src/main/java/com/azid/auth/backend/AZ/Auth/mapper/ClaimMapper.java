@@ -13,7 +13,7 @@ public interface ClaimMapper {
     ClaimDto toDto(Claim claim);
 
     QuotationApplicationResponseDto toResponseDTO(QuotationApplication application);
-    @Mapping(source = "claimId", target = "claimId")
+    @Mapping(source = "claimId", target = "claimID")
     ClaimResponseDto claimToClaimResponseDTO(Claim claim);
 
 }

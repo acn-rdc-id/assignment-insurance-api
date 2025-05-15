@@ -59,7 +59,7 @@ public class ClaimService {
 
     //todo : implement the logic to get the list of claim from the database based on user ID
     public List<ClaimListResponseDto> getAllClaims(String userId) {
-        log.info("start userid check {}", userId);
+        log.info("Get List of Claim from CLAIM by user id :{}", userId);
         return claimRepository.findByUserUserId(userId)
                 .stream()
                 .map(claim -> {
@@ -68,7 +68,9 @@ public class ClaimService {
                     dto.setPolicyId(claim.getPolicy() != null ? claim.getPolicy().getId() : null);
                     dto.setClaim_date(claim.getClaim_date());
                     dto.setClaimStatus(claim.getClaimStatus());
-                    dto.setClaimTypeId(claim.getClaimType() != null ? claim.getClaimType().getClaimTypeId() : null);
+
+                    ClaimType claimType = claimTypeRepository.getClaimTypeByClaimId(claim.getClaimType().getClaimTypeId());
+                    dto.setClaimType(claimType.getClaimTypeName());
 
                     return dto;
                 })
