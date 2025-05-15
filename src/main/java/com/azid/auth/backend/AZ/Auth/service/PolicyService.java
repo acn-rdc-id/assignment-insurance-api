@@ -200,5 +200,21 @@ public class PolicyService {
         quotationApplicationRepository.save(application);
     }
 
+    public QuotationApplicationResponseDto updatePolicy(Long id, PolicyServicingDto policyServicingDto) {
+        log.info("Updating policy ID: {}", id);
+
+        Policy policy =  policyRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(("Policy Not Found with ID " + id)));
+
+        QuotationApplication quotationApplication = policy.getQuotationApplication();
+
+        policyMapper.updatePolicyQuotationApplication(quotationApplication, policyServicingDto);
+
+        QuotationApplication updatedPolicyQuotationApplication = quotationApplicationRepository.save(quotationApplication);
+
+        log.info("Policy ID: {} updated successfully", id);
+
+        return quotationApplicationMapper.toResponseDto(updatedPolicyQuotationApplication);
+    }
 
 }

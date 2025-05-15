@@ -1,6 +1,7 @@
 package com.azid.auth.backend.AZ.Auth.controller;
 
 import com.azid.auth.backend.AZ.Auth.dto.PolicyResponseDto;
+import com.azid.auth.backend.AZ.Auth.dto.PolicyServicingDto;
 import com.azid.auth.backend.AZ.Auth.dto.QuotationApplicationRequestDto;
 import com.azid.auth.backend.AZ.Auth.dto.QuotationApplicationResponseDto;
 import com.azid.auth.backend.AZ.Auth.dtos.ApiResponseDto;
@@ -8,6 +9,7 @@ import com.azid.auth.backend.AZ.Auth.exceptions.ErrorResponse;
 import com.azid.auth.backend.AZ.Auth.service.PolicyService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.connector.Response;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -65,6 +67,18 @@ public class PolicyController {
         log.info("PolicyController: createApplication ENDED");
 
         return ResponseEntity.ok(new ApiResponseDto<>("Success", HttpStatus.OK.value(), "Application Created Successfully!", responseDto).getData());
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> updatePolicy(@Valid @PathVariable Long id, @RequestBody PolicyServicingDto dto, @RequestHeader HttpHeaders httpHeaders) {
+
+        log.info("PolicyController: updatePolicyServicing STARTED");
+
+        QuotationApplicationResponseDto responseDto = policyService.updatePolicy(id, dto);
+
+        log.info("PolicyController: updatePolicyServicing ENDED");
+
+        return ResponseEntity.ok(new ApiResponseDto<>("Success", HttpStatus.OK.value(), "", responseDto));
     }
 
 }
