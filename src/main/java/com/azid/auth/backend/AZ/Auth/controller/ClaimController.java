@@ -69,10 +69,20 @@ public class ClaimController {
 
         try {
             String userId = httpHeaders.getFirst("userId");
-            ClaimResponseDto responseDto = claimService.getClaimDetailsByClaimId(claimId, userId);
-            responseDto.setClaimID(claimId);
+            log.info("Start process for get claim details for userId: {}", userId);
 
-            apiResponseDto = new ApiResponseDto<>("Success", HttpStatus.OK.value(), "Claim Policy Document Retrieved Successfully!", responseDto);
+            ClaimResponseDto responseDto = claimService.getClaimDetailsByClaimId(claimId, userId);
+
+            if(responseDto == null) {
+                log.error("No claim details found for userId: {}", userId);
+                apiResponseDto = new ApiResponseDto<>("Error", HttpStatus.NOT_FOUND.value(), "No claim details found", null);
+            } else {
+                log.info("Claim details retrieved successfully for userId: {}", userId);
+                log.info("End process for get claim details");
+                responseDto.setClaimID(claimId);
+                apiResponseDto = new ApiResponseDto<>("Success", HttpStatus.OK.value(), "Get Claim Details by Claim ID and User ID Successfully!", responseDto);
+            }
+
         } catch (Exception e) {
             log.error("Error occurred while validating input parameters for get claim details: {}", e.getMessage());
             apiResponseDto = new ApiResponseDto<>("Error", HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error", null);
@@ -85,11 +95,12 @@ public class ClaimController {
         ApiResponseDto<ClaimInfoResponse> apiResponseDto = null;
 
         String userId = request.get("userId");
-        log.info("Start process for get claim policy document for userId: {}", userId);
+        log.info("Start process for get claim details by claim id and user id: {}", userId);
         try {
             if (userId == null || userId.isEmpty()) {
                 log.error("User ID is null or empty");
                 apiResponseDto = new ApiResponseDto<>("Error", HttpStatus.BAD_REQUEST.value(), "User ID cannot be null or empty", null);
+                return ResponseEntity.ok(apiResponseDto);
             }
 
             log.info("Fetching claim policy document for userId: {}", userId);
