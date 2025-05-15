@@ -9,12 +9,12 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 @Data
-public class ClaimResponseDto {
+public class ClaimListResponseDto {
 
 
     private Long claimId;
-    private PolicyDto policy;
-    private ClaimTypeDto claimType;
+    private Long policyId;
     private Date claim_date;
     private String claimStatus;
+    private Long claimTypeId;
 }
