@@ -24,9 +24,7 @@ public class PolicyService {
 
     private final PolicyRepository policyRepository;
     private final QuotationApplicationRepository quotationApplicationRepository;
-    private final BeneficiaryRepository beneficiaryRepository;
     private final PolicyMapper policyMapper;
-    private final BeneficiaryMapper beneficiaryMapper;
     private final QuotationApplicationMapper quotationApplicationMapper;
     private final BeneficiaryMapper beneficiaryMapper;
     private final BeneficiaryRepository beneficiaryRepository;
@@ -36,17 +34,14 @@ public class PolicyService {
 
     public PolicyService(
             PolicyRepository policyRepository,
-            QuotationApplicationRepository quotationApplicationRepository, BeneficiaryRepository beneficiaryRepository, BeneficiaryRepository beneficiaryRepository1,
-            PolicyMapper policyMapper, BeneficiaryMapper beneficiaryMapper,
-            QuotationApplicationMapper quotationApplicationMapper, UserRepository userRepository,
+            QuotationApplicationRepository quotationApplicationRepository, BeneficiaryRepository beneficiaryRepository1,
+            PolicyMapper policyMapper, QuotationApplicationMapper quotationApplicationMapper, UserRepository userRepository,
             PlanService planService, UserService userService, CommonUtils commonUtils,
             BeneficiaryMapper beneficiaryMapper, BeneficiaryRepository beneficiaryRepository) {
 
         this.policyRepository = policyRepository;
         this.quotationApplicationRepository = quotationApplicationRepository;
-        this.beneficiaryRepository = beneficiaryRepository;
         this.policyMapper = policyMapper;
-        this.beneficiaryMapper = beneficiaryMapper;
         this.quotationApplicationMapper = quotationApplicationMapper;
         this.planService = planService;
         this.userService = userService;
@@ -147,28 +142,6 @@ public class PolicyService {
             log.error("[createApplication] Unexpected error while creating application", e);
             throw new RuntimeException("An unexpected error occurred. Please try again later.");
         }
-    }
-
-    public BeneficiaryResponseDto createBeneficiary(BeneficiaryRequestDto requestDto) {
-        log.info("start [createBeneficiary] for policy ID: {}", requestDto.getPolicy().getId());
-
-        Policy policy = policyRepository.findById(requestDto.getPolicy().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Policy not found with ID: " + requestDto.getPolicy().getId()));
-
-        Beneficiary beneficiary = new Beneficiary();
-        beneficiary.setBeneficiaryName(requestDto.getBeneficiaryName());
-        beneficiary.setRelationshipToInsured(requestDto.getRelationshipToInsured());
-        beneficiary.setPolicy(policy);
-
-        Beneficiary savedBeneficiary = beneficiaryRepository.save(beneficiary);
-        log.info("[createBeneficiary] Beneficiary saved successfully with ID: {}", savedBeneficiary.getId());
-
-        return BeneficiaryResponseDto.builder()
-                .id(savedBeneficiary.getId())
-                .beneficiaryName(savedBeneficiary.getBeneficiaryName())
-                .relationshipToInsured(savedBeneficiary.getRelationshipToInsured())
-                .policy(beneficiaryMapper.policyToPolicyResponseDTO(savedBeneficiary.getPolicy()))
-                .build();
     }
 
     private QuotationApplication buildApplicationFromDto(PersonDto personDto, PlanInfoDto planInfoDto) {
