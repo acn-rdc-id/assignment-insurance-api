@@ -200,21 +200,38 @@ public class PolicyService {
         quotationApplicationRepository.save(application);
     }
 
+
     public QuotationApplicationResponseDto updatePolicy(Long id, PolicyServicingDto policyServicingDto) {
         log.info("Updating policy ID: {}", id);
+        Policy policy = policyRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(("Policy Not Found with ID " + id)));
 
-        Policy policy =  policyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(("Policy Not Found with ID " + id)));
-
+        Plan plan = policy.getPlan();
         QuotationApplication quotationApplication = policy.getQuotationApplication();
 
         policyMapper.updatePolicyQuotationApplication(quotationApplication, policyServicingDto);
 
         QuotationApplication updatedPolicyQuotationApplication = quotationApplicationRepository.save(quotationApplication);
+        PlanInfoDto planInfoDto = planInfoDtoBuilder(plan, quotationApplication);
 
         log.info("Policy ID: {} updated successfully", id);
 
-        return quotationApplicationMapper.toResponseDto(updatedPolicyQuotationApplication);
+        QuotationApplicationResponseDto responseDto = quotationApplicationMapper.toResponseDto(updatedPolicyQuotationApplication);
+
+        responseDto.setPlanResponseDto(planInfoDto);
+
+        return responseDto;
+    }
+
+    public PlanInfoDto planInfoDtoBuilder(Plan plan, QuotationApplication quotationApplication) {
+        return PlanInfoDto.builder()
+                .id(plan.getId())
+                .planName(plan.getPlanName())
+                .coverageTerm(plan.getDuration().toString().concat(" years"))
+                .sumAssured(plan.getCoverageAmount())
+                .premiumAmount(quotationApplication.getPremiumAmount())
+                .premiumMode(quotationApplication.getPremiumMode())
+                .referenceNumber(quotationApplication.getReferenceNumber())
+                .build();
     }
 
 }
