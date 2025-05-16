@@ -124,12 +124,12 @@ public class ClaimController {
     }
 
     @PostMapping("/submit")
-    public ResponseEntity<ApiResponseDto<ClaimInfoResponse>> submitClaim(@RequestParam("policyID") String policyID,
-                                                                         @RequestParam("userID") String userID,
+    public ResponseEntity<ApiResponseDto<ClaimInfoResponse>> submitClaim(@RequestHeader HttpHeaders httpHeaders,
+                                                                         @RequestParam("policyID") String policyID,
                                                                          @RequestParam("claimTypeID") String claimTypeID,
                                                                          @RequestPart("files") List<MultipartFile> files) {
         ApiResponseDto apiResponseDto = null;
-
+        String userID = httpHeaders.getFirst("userId");
         log.info("Start process for submit claim policy document for userId: {}", userID);
         try{
             if (policyID == null || policyID.isEmpty()) {
