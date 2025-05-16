@@ -10,13 +10,15 @@ import java.util.Optional;
 public interface RuleSetRepository extends JpaRepository<RuleSet, Long> {
 
     @Query(value = """
-        SELECT r.* FROM ruleset r
+        SELECT r.*
+        FROM ruleset r
+        JOIN plan p ON r.plan_id = p.plan_id
         WHERE r.plan_id = :planId
           AND r.gender = :gender
           AND r.payment_frequency = :paymentFrequency
-          AND ((r.operator = '>=' AND :age >= r.age_limit) OR
-              (r.operator = '<=' AND :age <= r.age_limit))
-        ORDER BY r.age_limit ASC
+          AND r.age_limit <= :age
+          AND r.status = 'ACTIVE'
+        ORDER BY r.age_limit DESC
         LIMIT 1
         """, nativeQuery = true)
     Optional<RuleSet> findMatchingRuleSet(
