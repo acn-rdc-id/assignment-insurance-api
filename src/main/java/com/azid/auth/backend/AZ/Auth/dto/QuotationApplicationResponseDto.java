@@ -30,4 +30,5 @@ public class QuotationApplicationResponseDto {
     public String purposeOfTransaction;
     public String applicationStatus;
     public Plan plan;
+    public PlanInfoDto planResponseDto;
 }
