@@ -106,7 +106,7 @@ public class PolicyService {
                 .orElseThrow(() -> new ResourceNotFoundException("Quotation Application not found"));
     }
 
-    public QuotationApplicationResponseDto createApplication(QuotationApplicationRequestDto requestDto,String userId) {
+    public QuotationApplicationResponseDto createApplication(QuotationApplicationRequestDto requestDto, String userId) {
         PersonDto personDto = requestDto.getPersonDto();
         PlanInfoDto planInfoDto = requestDto.getPlanInfoDto();
 
@@ -187,7 +187,7 @@ public class PolicyService {
     }
 
     public void updateStatusAndPayment(Long applicationId, String status, Payment payment) {
-        log.info("[updateStatusAndPayment] application ID: {}, payment ID: {}", applicationId, payment!=null ? payment.getId():null);
+        log.info("[updateStatusAndPayment] application ID: {}, payment ID: {}", applicationId, payment != null ? payment.getId() : null);
         QuotationApplication application = getQuotationApplication(applicationId);
         application.setApplicationStatus(status);
         if (Objects.nonNull(payment)) {
@@ -196,24 +196,40 @@ public class PolicyService {
         quotationApplicationRepository.save(application);
     }
 
+    public PlanInfoDto planInfoDtoBuilder(Plan plan, QuotationApplication quotationApplication) {
+        return PlanInfoDto.builder()
+                .id(plan.getId())
+                .planName(plan.getPlanName())
+                .coverageTerm(plan.getDuration().toString().concat(" years"))
+                .sumAssured(plan.getCoverageAmount())
+                .premiumAmount(quotationApplication.getPremiumAmount())
+                .premiumMode(quotationApplication.getPremiumMode())
+                .referenceNumber(quotationApplication.getReferenceNumber())
+                .build();
+    }
+
 
     private static final int MAX_BENEFICIARIES = 2;
 
     public QuotationApplicationResponseDto updatePolicy(Long id, PolicyServicingDto policyServicingDto) {
         log.info("Updating policy ID: {}", id);
+        Policy policy = policyRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(("Policy Not Found with ID " + id)));
 
-        Policy policy =  policyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(("Policy Not Found with ID " + id)));
-
+        Plan plan = policy.getPlan();
         QuotationApplication quotationApplication = policy.getQuotationApplication();
 
         policyMapper.updatePolicyQuotationApplication(quotationApplication, policyServicingDto);
 
         QuotationApplication updatedPolicyQuotationApplication = quotationApplicationRepository.save(quotationApplication);
+        PlanInfoDto planInfoDto = planInfoDtoBuilder(plan, quotationApplication);
 
         log.info("Policy ID: {} updated successfully", id);
 
-        return quotationApplicationMapper.toResponseDto(updatedPolicyQuotationApplication);
+        QuotationApplicationResponseDto responseDto = quotationApplicationMapper.toResponseDto(updatedPolicyQuotationApplication);
+
+        responseDto.setPlanResponseDto(planInfoDto);
+
+        return responseDto;
     }
 
     public BeneficiaryResponseDto upsertAll(BeneficiaryRequestDto req, String userId) {
@@ -235,12 +251,15 @@ public class PolicyService {
             switch (b.getAction()) {
                 case UPDATE -> {
                     if (b.getId() == null) throw new BadRequestException("UPDATE action requires an ID");
-                    if (!existingMap.containsKey(b.getId())) throw new ResourceNotFoundException("Beneficiary not found: " + b.getId());
-                    if (b.getShare() == null || b.getShare() <= 0) throw new BadRequestException("Share must be > 0 for UPDATE");
+                    if (!existingMap.containsKey(b.getId()))
+                        throw new ResourceNotFoundException("Beneficiary not found: " + b.getId());
+                    if (b.getShare() == null || b.getShare() <= 0)
+                        throw new BadRequestException("Share must be > 0 for UPDATE");
                     updatedShares.put(b.getId(), b.getShare());
                 }
                 case CREATE -> {
-                    if (b.getShare() == null || b.getShare() <= 0) throw new BadRequestException("Share must be > 0 for CREATE");
+                    if (b.getShare() == null || b.getShare() <= 0)
+                        throw new BadRequestException("Share must be > 0 for CREATE");
                     createShares.add(b.getShare());
                 }
                 case DELETE -> {
