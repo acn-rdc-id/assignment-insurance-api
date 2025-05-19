@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: Allianz Demo Application
+  datasource:
+    hikari:
+      jdbc-url: jdbc:mysql://dbsvr01.semicolon-my.com/acn_az_rdc_id?autoReconnect=true
+      username: webapp_rdc
+      password: RDCallianz@12345
+      driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MariaDBDialect
+        format-sql: true
+logging:
+  level:
+    '[org.springframework.security]': DEBUG
+    '[org.hibernate]': DEBUG
