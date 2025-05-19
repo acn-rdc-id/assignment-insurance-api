@@ -234,8 +234,8 @@ public class PolicyService {
 
     public BeneficiaryResponseDto upsertAll(BeneficiaryRequestDto req, String userId) {
         Policy policy = policyRepository.findByUserId(userId).stream()
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("No policy found for user: " + userId));
+                .filter(p -> req.getPolicyNo().equalsIgnoreCase(p.getPolicyNo()))
+                .findAny().orElseThrow(() -> new ResourceNotFoundException("No policy found for user: " + userId));
 
         List<Beneficiary> existing = beneficiaryRepository.findByPolicy(policy);
         List<BeneficiaryDto> actions = req.getBeneficiaries();
