@@ -20,7 +20,6 @@ public class PolicyDto {
     private Date endDate;
     private PlanDetailsDto planDetailsDto;
     private UserDto userDto;
-    private InsuredDto insuredDto;
     private PaymentDto paymentDto;
     private List<ClaimDto> claimDtoList;
     private String status;
