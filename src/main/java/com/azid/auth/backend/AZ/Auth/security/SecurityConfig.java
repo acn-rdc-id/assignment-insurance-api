@@ -20,7 +20,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 public class SecurityConfig {
 
-
     private final UserRepository userRepository;
     private final JwtAuthorizationFilter jwtAuthorizationFilter;
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);

@@ -67,6 +67,7 @@ public class PaymentService {
 
                 PaymentDetailsDto paymentDetailsDto = paymentMapper.paymentToPaymentDetailsDto(payment);
                 paymentDetailsDto.setPaymentId(payment.getId());
+                paymentDetailsDto.setPaymentReferenceNumber(payment.getReferenceNumber());
 
                 responseDto.setPolicy(policyResponseDto);
                 responseDto.setPaymentDetails(paymentDetailsDto);
