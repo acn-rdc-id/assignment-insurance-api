@@ -15,10 +15,7 @@ import com.azid.auth.backend.AZ.Auth.utils.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -37,9 +34,8 @@ public class PolicyService {
 
     public PolicyService(
             PolicyRepository policyRepository,
-            QuotationApplicationRepository quotationApplicationRepository,
-            PolicyMapper policyMapper,
-            QuotationApplicationMapper quotationApplicationMapper, UserRepository userRepository,
+            QuotationApplicationRepository quotationApplicationRepository, BeneficiaryRepository beneficiaryRepository1,
+            PolicyMapper policyMapper, QuotationApplicationMapper quotationApplicationMapper, UserRepository userRepository,
             PlanService planService, UserService userService, CommonUtils commonUtils,
             BeneficiaryMapper beneficiaryMapper, BeneficiaryRepository beneficiaryRepository) {
 
@@ -110,7 +106,7 @@ public class PolicyService {
                 .orElseThrow(() -> new ResourceNotFoundException("Quotation Application not found"));
     }
 
-    public QuotationApplicationResponseDto createApplication(QuotationApplicationRequestDto requestDto,String userId) {
+    public QuotationApplicationResponseDto createApplication(QuotationApplicationRequestDto requestDto, String userId) {
         PersonDto personDto = requestDto.getPersonDto();
         PlanInfoDto planInfoDto = requestDto.getPlanInfoDto();
 
@@ -163,7 +159,7 @@ public class PolicyService {
         application.setPhoneNo(personDto.getPhoneNo());
         application.setEmail(personDto.getEmail());
         application.setDateOfBirth(personDto.getDateOfBirth());
-        application.setSmoker(Boolean.TRUE.equals(personDto.getIsSmoker()));
+        application.setSmoker(personDto.isSmoker());
         application.setUsPerson(Boolean.TRUE.equals(personDto.getIsUsPerson()));
         application.setCigarettesNo(personDto.getCigarettesNo());
         application.setOccupation(personDto.getOccupation());
@@ -191,7 +187,7 @@ public class PolicyService {
     }
 
     public void updateStatusAndPayment(Long applicationId, String status, Payment payment) {
-        log.info("[updateStatusAndPayment] application ID: {}, payment ID: {}", applicationId, payment!=null ? payment.getId():null);
+        log.info("[updateStatusAndPayment] application ID: {}, payment ID: {}", applicationId, payment != null ? payment.getId() : null);
         QuotationApplication application = getQuotationApplication(applicationId);
         application.setApplicationStatus(status);
         if (Objects.nonNull(payment)) {
@@ -200,6 +196,20 @@ public class PolicyService {
         quotationApplicationRepository.save(application);
     }
 
+    public PlanInfoDto planInfoDtoBuilder(Plan plan, QuotationApplication quotationApplication) {
+        return PlanInfoDto.builder()
+                .id(plan.getId())
+                .planName(plan.getPlanName())
+                .coverageTerm(plan.getDuration().toString().concat(" years"))
+                .sumAssured(plan.getCoverageAmount())
+                .premiumAmount(quotationApplication.getPremiumAmount())
+                .premiumMode(quotationApplication.getPremiumMode())
+                .referenceNumber(quotationApplication.getReferenceNumber())
+                .build();
+    }
+
+
+    private static final int MAX_BENEFICIARIES = 2;
 
     public QuotationApplicationResponseDto updatePolicy(Long id, PolicyServicingDto policyServicingDto) {
         log.info("Updating policy ID: {}", id);
@@ -222,16 +232,103 @@ public class PolicyService {
         return responseDto;
     }
 
-    public PlanInfoDto planInfoDtoBuilder(Plan plan, QuotationApplication quotationApplication) {
-        return PlanInfoDto.builder()
-                .id(plan.getId())
-                .planName(plan.getPlanName())
-                .coverageTerm(plan.getDuration().toString().concat(" years"))
-                .sumAssured(plan.getCoverageAmount())
-                .premiumAmount(quotationApplication.getPremiumAmount())
-                .premiumMode(quotationApplication.getPremiumMode())
-                .referenceNumber(quotationApplication.getReferenceNumber())
+    public BeneficiaryResponseDto upsertAll(BeneficiaryRequestDto req, String userId) {
+        Policy policy = policyRepository.findByUserId(userId).stream()
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("No policy found for user: " + userId));
+
+        List<Beneficiary> existing = beneficiaryRepository.findByPolicy(policy);
+        List<BeneficiaryDto> actions = req.getBeneficiaries();
+
+        Map<Long, Beneficiary> existingMap = existing.stream()
+                .collect(Collectors.toMap(Beneficiary::getId, b -> b));
+
+        Map<Long, Float> updatedShares = new HashMap<>();
+        List<Float> createShares = new ArrayList<>();
+        Set<Long> deleteIds = new HashSet<>();
+
+        for (BeneficiaryDto b : actions) {
+            switch (b.getAction()) {
+                case UPDATE -> {
+                    if (b.getId() == null) throw new BadRequestException("UPDATE action requires an ID");
+                    if (!existingMap.containsKey(b.getId()))
+                        throw new ResourceNotFoundException("Beneficiary not found: " + b.getId());
+                    if (b.getShare() == null || b.getShare() <= 0)
+                        throw new BadRequestException("Share must be > 0 for UPDATE");
+                    updatedShares.put(b.getId(), b.getShare());
+                }
+                case CREATE -> {
+                    if (b.getShare() == null || b.getShare() <= 0)
+                        throw new BadRequestException("Share must be > 0 for CREATE");
+                    createShares.add(b.getShare());
+                }
+                case DELETE -> {
+                    if (b.getId() == null) throw new BadRequestException("DELETE action requires an ID");
+                    deleteIds.add(b.getId());
+                }
+            }
+        }
+
+        int finalTotal = 0;
+
+        for (Beneficiary b : existing) {
+            Long id = b.getId();
+            if (deleteIds.contains(id)) continue;
+            if (updatedShares.containsKey(id)) {
+                finalTotal += Math.round(updatedShares.get(id));
+            } else {
+                finalTotal += Math.round(b.getShare());
+            }
+        }
+
+        for (Float s : createShares) {
+            finalTotal += Math.round(s);
+        }
+
+        if (finalTotal != 100) {
+            throw new BadRequestException("Total share must equal 100% after all actions. Current total: " + finalTotal);
+        }
+
+        long countAfterOps = existing.stream()
+                .filter(b -> !deleteIds.contains(b.getId()))
+                .count() + createShares.size();
+
+        if (countAfterOps > MAX_BENEFICIARIES) {
+            throw new BadRequestException("Only " + MAX_BENEFICIARIES + " beneficiaries are allowed per policy. Current total after changes: " + countAfterOps);
+        }
+
+        List<BeneficiaryDto> out = new ArrayList<>();
+
+        for (BeneficiaryDto b : actions) {
+            switch (b.getAction()) {
+                case CREATE -> {
+                    Beneficiary entity = beneficiaryMapper.toEntity(b);
+                    entity.setPolicy(policy);
+                    entity = beneficiaryRepository.save(entity);
+                    BeneficiaryDto dto = beneficiaryMapper.toDto(entity);
+//                        dto.setAction(BeneficiaryDto.Action.CREATE);
+                    out.add(dto);
+                }
+                case UPDATE -> {
+                    Beneficiary entity = beneficiaryRepository.findById(b.getId())
+                            .orElseThrow(() -> new ResourceNotFoundException("Beneficiary not found: " + b.getId()));
+                    entity.setBeneficiaryName(b.getBeneficiaryName());
+                    entity.setRelationshipToInsured(b.getRelationshipToInsured());
+                    entity.setShare(b.getShare());
+                    entity = beneficiaryRepository.save(entity);
+                    BeneficiaryDto dto = beneficiaryMapper.toDto(entity);
+//                        dto.setAction(BeneficiaryDto.Action.UPDATE);
+                    out.add(dto);
+                }
+                case DELETE -> {
+                    beneficiaryRepository.deleteById(b.getId());
+                }
+            }
+        }
+
+        return BeneficiaryResponseDto.builder()
+                .policyNo(policy.getPolicyNo())
+                .beneficiaries(out)
                 .build();
     }
-
 }
