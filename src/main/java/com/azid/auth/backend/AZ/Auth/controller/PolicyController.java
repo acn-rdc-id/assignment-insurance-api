@@ -42,6 +42,7 @@ public class PolicyController {
     public ApiResponseDto<PolicyResponseDto> getPolicyById(@PathVariable Long id) {
 
         log.info("PolicyController: getPolicyById STARTED");
+        log.info("PolicyController: getPolicyById STARTED");
 
         PolicyResponseDto response = policyService.getPolicyById(id);
 
