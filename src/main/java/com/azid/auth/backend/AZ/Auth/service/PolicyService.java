@@ -230,6 +230,7 @@ public class PolicyService {
         responseDto.setPlanResponseDto(planInfoDto);
 
         return responseDto;
+    }
 
     public BeneficiaryResponseDto upsertAll(BeneficiaryRequestDto req, String userId) {
         Policy policy = policyRepository.findByUserId(userId).stream()
