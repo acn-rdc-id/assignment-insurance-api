@@ -22,9 +22,9 @@ public class BeneficiaryDto {
     private String relationshipToInsured;
     private Float share;
 
+    @JsonInclude(Include.NON_NULL)
     private Action action;
 
-    @JsonInclude(Include.NON_EMPTY)
     public enum Action {
         CREATE, UPDATE, DELETE
     }

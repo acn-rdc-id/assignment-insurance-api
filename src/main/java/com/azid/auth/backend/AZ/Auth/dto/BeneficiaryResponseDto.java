@@ -14,5 +14,7 @@ import java.util.List;
 @Builder
 public class BeneficiaryResponseDto {
     private String policyNo;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<BeneficiaryDto> beneficiaries;
 }
