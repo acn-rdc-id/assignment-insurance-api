@@ -1,6 +1,5 @@
 package com.azid.auth.backend.AZ.Auth.service;
 
-import com.azid.auth.backend.AZ.Auth.dto.ClaimDto;
 import com.azid.auth.backend.AZ.Auth.dto.ClaimInfoResponse;
 import com.azid.auth.backend.AZ.Auth.dto.ClaimListResponseDto;
 import com.azid.auth.backend.AZ.Auth.dto.ClaimResponseDto;
@@ -11,51 +10,40 @@ import com.azid.auth.backend.AZ.Auth.mapper.UserMapper;
 import com.azid.auth.backend.AZ.Auth.model.*;
 import com.azid.auth.backend.AZ.Auth.repository.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class ClaimService {
+    private final ClaimTypeRepository claimTypeRepository;
+    private final PolicyRepository policyRepository;
+    private final ClaimRepository claimRepository;
+    private final ClaimDocumentRepository claimDocumentRepository;
+    private final UserRepository userRepository;
+    private final UserService userService;
+    private final AwsS3Service awsS3Service;
+    private final DocumentTypeRepository documentTypeRepository;
+    private final PolicyMapper policyMapper;
+    private final UserMapper userMapper;
+    private final ClaimTypeMapper claimTypeMapper;
 
-    @Autowired
-    ClaimTypeRepository claimTypeRepository;
-
-    @Autowired
-    PolicyRepository policyRepository;
-
-    @Autowired
-    ClaimRepository claimRepository;
-
-    @Autowired
-    ClaimDocumentRepository claimDocumentRepository;
-
-    @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    UserService userService;
-
-    @Autowired
-    AwsS3Service awsS3Service;
-
-    @Autowired
-    DocumentTypeRepository documentTypeRepository;
-
-    @Autowired
-    PolicyMapper policyMapper;
-
-    @Autowired
-    UserMapper userMapper;
-
-    @Autowired
-    ClaimTypeMapper claimTypeMapper;
-
+    public ClaimService(ClaimTypeRepository claimTypeRepository, PolicyRepository policyRepository, ClaimRepository claimRepository, ClaimDocumentRepository claimDocumentRepository, UserRepository userRepository, UserService userService, AwsS3Service awsS3Service, DocumentTypeRepository documentTypeRepository, PolicyMapper policyMapper, UserMapper userMapper, ClaimTypeMapper claimTypeMapper) {
+        this.claimTypeRepository = claimTypeRepository;
+        this.policyRepository = policyRepository;
+        this.claimRepository = claimRepository;
+        this.claimDocumentRepository = claimDocumentRepository;
+        this.userRepository = userRepository;
+        this.userService = userService;
+        this.awsS3Service = awsS3Service;
+        this.documentTypeRepository = documentTypeRepository;
+        this.policyMapper = policyMapper;
+        this.userMapper = userMapper;
+        this.claimTypeMapper = claimTypeMapper;
+    }
 
     //todo : implement the logic to get the list of claim from the database based on user ID
     public List<ClaimListResponseDto> getAllClaims(String userId) {
