@@ -99,7 +99,6 @@ public class PolicyService {
         return policyResponseDto;
     }
 
-
     public QuotationApplication getQuotationApplication(Long id) {
         log.info("start [getQuotationApplication] applicationId: {}", id);
         return quotationApplicationRepository.findById(id)
@@ -208,9 +207,6 @@ public class PolicyService {
                 .build();
     }
 
-
-    private static final int MAX_BENEFICIARIES = 2;
-
     public QuotationApplicationResponseDto updatePolicy(Long id, PolicyServicingDto policyServicingDto) {
         log.info("Updating policy ID: {}", id);
         Policy policy = policyRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(("Policy Not Found with ID " + id)));
@@ -233,92 +229,106 @@ public class PolicyService {
     }
 
     public BeneficiaryResponseDto upsertAll(BeneficiaryRequestDto req, String userId) {
+        final int MAX_BENEFICIARIES = 2;
+
         Policy policy = policyRepository.findByUserId(userId).stream()
                 .filter(p -> req.getPolicyNo().equalsIgnoreCase(p.getPolicyNo()))
-                .findAny().orElseThrow(() -> new ResourceNotFoundException("No policy found for user: " + userId));
+                .findAny()
+                .orElseThrow(() -> new ResourceNotFoundException("No policy found for user: " + userId));
 
-        List<Beneficiary> existing = beneficiaryRepository.findByPolicy(policy);
-        List<BeneficiaryDto> actions = req.getBeneficiaries();
+        List<Beneficiary> existing     = beneficiaryRepository.findByPolicy(policy);
+        List<BeneficiaryDto> actions   = req.getBeneficiaries();
 
         Map<Long, Beneficiary> existingMap = existing.stream()
                 .collect(Collectors.toMap(Beneficiary::getId, b -> b));
 
-        Map<Long, Float> updatedShares = new HashMap<>();
-        List<Float> createShares = new ArrayList<>();
-        Set<Long> deleteIds = new HashSet<>();
+        Set<Long>    deleteIds     = new HashSet<>();
+        List<Float>  createShares  = new ArrayList<>();
+        Map<Long,Float> updateShares = new HashMap<>();
+
+        int activeCount = existing.size();
 
         for (BeneficiaryDto b : actions) {
+            if (b.getAction() == null) {
+                throw new BadRequestException("Action cannot be null");
+            }
             switch (b.getAction()) {
-                case UPDATE -> {
-                    if (b.getId() == null) throw new BadRequestException("UPDATE action requires an ID");
-                    if (!existingMap.containsKey(b.getId()))
-                        throw new ResourceNotFoundException("Beneficiary not found: " + b.getId());
-                    if (b.getShare() == null || b.getShare() <= 0)
-                        throw new BadRequestException("Share must be > 0 for UPDATE");
-                    updatedShares.put(b.getId(), b.getShare());
-                }
                 case CREATE -> {
-                    if (b.getShare() == null || b.getShare() <= 0)
+                    if (b.getShare() == null || b.getShare() <= 0) {
                         throw new BadRequestException("Share must be > 0 for CREATE");
+                    }
                     createShares.add(b.getShare());
+                    activeCount++;
+                }
+                case UPDATE -> {
+                    if (b.getId() == null) {
+                        throw new BadRequestException("UPDATE requires an ID");
+                    }
+                    if (!existingMap.containsKey(b.getId())) {
+                        throw new ResourceNotFoundException("Beneficiary not found: " + b.getId());
+                    }
+                    if (b.getShare() == null || b.getShare() <= 0) {
+                        throw new BadRequestException("Share must be > 0 for UPDATE");
+                    }
+                    updateShares.put(b.getId(), b.getShare());
                 }
                 case DELETE -> {
-                    if (b.getId() == null) throw new BadRequestException("DELETE action requires an ID");
+                    if (b.getId() == null)
+                        throw new BadRequestException("DELETE requires an ID");
+
+                    // ← NEW: existence check
+                    if (!existingMap.containsKey(b.getId())) {
+                        throw new ResourceNotFoundException(
+                                "Cannot delete beneficiary — no beneficiary with ID " + b.getId() +
+                                        " found under policy " + policy.getPolicyNo());
+                    }
+
                     deleteIds.add(b.getId());
+                    activeCount--;
                 }
             }
+        }
+
+        if (activeCount > MAX_BENEFICIARIES) {
+            throw new BadRequestException(
+                    "Only " + MAX_BENEFICIARIES + " beneficiaries allowed, would be " + activeCount
+            );
         }
 
         int finalTotal = 0;
 
         for (Beneficiary b : existing) {
-            Long id = b.getId();
-            if (deleteIds.contains(id)) continue;
-            if (updatedShares.containsKey(id)) {
-                finalTotal += Math.round(updatedShares.get(id));
-            } else {
-                finalTotal += Math.round(b.getShare());
-            }
+            if (deleteIds.contains(b.getId())) continue;
+            float share = updateShares.getOrDefault(b.getId(), b.getShare());
+            finalTotal += Math.round(share);
         }
-
         for (Float s : createShares) {
             finalTotal += Math.round(s);
         }
 
-        if (finalTotal != 100) {
-            throw new BadRequestException("Total share must equal 100% after all actions. Current total: " + finalTotal);
-        }
-
-        long countAfterOps = existing.stream()
-                .filter(b -> !deleteIds.contains(b.getId()))
-                .count() + createShares.size();
-
-        if (countAfterOps > MAX_BENEFICIARIES) {
-            throw new BadRequestException("Only " + MAX_BENEFICIARIES + " beneficiaries are allowed per policy. Current total after changes: " + countAfterOps);
+        if (!(finalTotal == 100 || (finalTotal == 0 && activeCount == 0))) {
+            throw new BadRequestException(
+                    "Total share must equal 100% (or 0 if none left), was " + finalTotal
+            );
         }
 
         List<BeneficiaryDto> out = new ArrayList<>();
-
         for (BeneficiaryDto b : actions) {
             switch (b.getAction()) {
                 case CREATE -> {
-                    Beneficiary entity = beneficiaryMapper.toEntity(b);
-                    entity.setPolicy(policy);
-                    entity = beneficiaryRepository.save(entity);
-                    BeneficiaryDto dto = beneficiaryMapper.toDto(entity);
-//                        dto.setAction(BeneficiaryDto.Action.CREATE);
-                    out.add(dto);
+                    Beneficiary e = beneficiaryMapper.toEntity(b);
+                    e.setPolicy(policy);
+                    e = beneficiaryRepository.save(e);
+                    out.add(beneficiaryMapper.toDto(e));
                 }
                 case UPDATE -> {
-                    Beneficiary entity = beneficiaryRepository.findById(b.getId())
+                    Beneficiary e = beneficiaryRepository.findById(b.getId())
                             .orElseThrow(() -> new ResourceNotFoundException("Beneficiary not found: " + b.getId()));
-                    entity.setBeneficiaryName(b.getBeneficiaryName());
-                    entity.setRelationshipToInsured(b.getRelationshipToInsured());
-                    entity.setShare(b.getShare());
-                    entity = beneficiaryRepository.save(entity);
-                    BeneficiaryDto dto = beneficiaryMapper.toDto(entity);
-//                        dto.setAction(BeneficiaryDto.Action.UPDATE);
-                    out.add(dto);
+                    e.setBeneficiaryName(b.getBeneficiaryName());
+                    e.setRelationshipToInsured(b.getRelationshipToInsured());
+                    e.setShare(b.getShare());
+                    e = beneficiaryRepository.save(e);
+                    out.add(beneficiaryMapper.toDto(e));
                 }
                 case DELETE -> {
                     beneficiaryRepository.deleteById(b.getId());
