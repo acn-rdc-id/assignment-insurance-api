@@ -90,11 +90,11 @@ public class ClaimController {
         return ResponseEntity.ok(apiResponseDto);
     }
 
-    @PostMapping("/claimpolicydocument")
-    public ResponseEntity<ApiResponseDto<ClaimInfoResponse>> getPolicyByUserId(@RequestBody Map<String, String> request) {
+    @GetMapping("/claimpolicydocument")
+    public ResponseEntity<ApiResponseDto<ClaimInfoResponse>> getPolicyByUserId(@RequestHeader HttpHeaders request) {
         ApiResponseDto<ClaimInfoResponse> apiResponseDto = null;
 
-        String userId = request.get("userId");
+        String userId = String.valueOf(request.getFirst("userId"));
         log.info("Start process for get claim details by claim id and user id: {}", userId);
         try {
             if (userId == null || userId.isEmpty()) {
@@ -162,7 +162,7 @@ public class ClaimController {
         return ResponseEntity.ok(apiResponseDto);
     }
 
-    @PostMapping("/download")
+    @GetMapping("/download")
     public ResponseEntity<byte[]> downloadFile(@RequestBody Map<String, String> request) {
 
         String keyName = request.get("keyName");
