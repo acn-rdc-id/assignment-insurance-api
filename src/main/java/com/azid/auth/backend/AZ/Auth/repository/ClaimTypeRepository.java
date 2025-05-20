@@ -18,8 +18,8 @@ public interface ClaimTypeRepository extends JpaRepository<ClaimType,Long> {
 
     @Query(value = """
     SELECT ct.claim_type_id, ct.claim_type_name, ct.claim_type_description
-    FROM claim_type ct
-    JOIN claim c ON c.claim_type_id = ct.claim_type_id
+    FROM claim c
+    JOIN claim_type ct ON c.claim_type_id = ct.claim_type_id
     WHERE c.claim_id = :claimId
     """, nativeQuery = true)
     ClaimType getClaimTypeByClaimId(@Param("claimId") Long claimId);
