@@ -19,7 +19,7 @@ import java.util.Map;
 public class ClaimResponseDto {
 
     private Long claimID;
-    private Long policyID;
+    private String policyNo;
     private List<Map<String,String>> documentList;
     private ClaimType claimType;
     private LocalDate claim_date;
