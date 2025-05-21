@@ -1,7 +1,7 @@
 package com.azid.auth.backend.AZ.Auth.controller;
 
+import com.azid.auth.backend.AZ.Auth.dto.AuthResponseDto;
 import com.azid.auth.backend.AZ.Auth.dtos.ApiResponseDto;
-import com.azid.auth.backend.AZ.Auth.exceptions.ForbiddenException;
 import com.azid.auth.backend.AZ.Auth.model.AuthRequest;
 import com.azid.auth.backend.AZ.Auth.model.User;
 import com.azid.auth.backend.AZ.Auth.repository.UserRepository;
@@ -10,16 +10,12 @@ import com.azid.auth.backend.AZ.Auth.utils.JwtUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -45,23 +41,8 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody AuthRequest authRequest) {
-        User user = userRepository.findByEmail(authRequest.getEmail())
-                .orElseThrow(() -> new ForbiddenException("User not found with email: " + authRequest.getEmail()));
-
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword()));
-
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String jwtToken = jwtUtils.generateJwtToken(userDetails);
-
-        Object data = Map.of(
-        "token", jwtToken,
-        "email", user.getEmail(),
-        "username", user.getUsername(),
-        "userId", user.getUserId()
-        );
-
-        return ResponseEntity.ok(new ApiResponseDto<>("Success", HttpStatus.OK.value(), "User logged in Successfully!", data));
+    public ResponseEntity<ApiResponseDto<AuthResponseDto>> loginUser(@RequestBody AuthRequest authRequest) {
+        AuthResponseDto authResponseDto = userService.userLogin(authRequest);
+        return ResponseEntity.ok(new ApiResponseDto<>("Success", HttpStatus.OK.value(), "User logged in Successfully!", authResponseDto));
     }
 }
