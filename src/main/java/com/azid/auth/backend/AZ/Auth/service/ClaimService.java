@@ -54,7 +54,7 @@ public class ClaimService {
                     ClaimListResponseDto dto = new ClaimListResponseDto();
                     dto.setClaimId(claim.getClaimId());
                     dto.setPolicyId(claim.getPolicy() != null ? claim.getPolicy().getId() : null);
-                    dto.setClaim_date(claim.getClaim_date());
+                    dto.setClaimDate(claim.getClaim_date());
                     dto.setClaimStatus(claim.getClaimStatus());
 
                     ClaimType claimType = claimTypeRepository.getClaimTypeByClaimId(claim.getClaimId());
@@ -93,7 +93,7 @@ public class ClaimService {
 
         claimDto.setDocumentList(documentListMap);
         claimDto.setPolicyNo(claim.getPolicy().getPolicyNo());
-        claimDto.setClaim_date(claim.getClaim_date());
+        claimDto.setClaimDate(claim.getClaim_date());
         claimDto.setClaimStatus(claim.getClaimStatus());
 
         return claimDto;
@@ -166,7 +166,7 @@ public class ClaimService {
                 claimResponseDto.setPolicyNo(policy.getPolicyNo());
                 claimResponseDto.setDocumentList(documentList);
                 claimResponseDto.setClaimType(claimtype);
-                claimResponseDto.setClaim_date(date);
+                claimResponseDto.setClaimDate(date);
                 claimResponseDto.setClaimStatus(claim.getClaimStatus());
 
 

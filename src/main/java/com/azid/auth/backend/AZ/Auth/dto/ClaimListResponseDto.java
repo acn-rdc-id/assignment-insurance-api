@@ -15,7 +15,7 @@ public class ClaimListResponseDto {
 
     private Long claimId;
     private Long policyId;
-    private LocalDate claim_date;
+    private LocalDate claimDate;
     private String claimStatus;
     private String claimType;
 }

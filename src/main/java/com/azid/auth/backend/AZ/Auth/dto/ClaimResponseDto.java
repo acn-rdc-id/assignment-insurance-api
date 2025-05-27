@@ -22,6 +22,6 @@ public class ClaimResponseDto {
     private String policyNo;
     private List<Map<String,String>> documentList;
     private ClaimType claimType;
-    private LocalDate claim_date;
+    private LocalDate claimDate;
     private String claimStatus;
 }

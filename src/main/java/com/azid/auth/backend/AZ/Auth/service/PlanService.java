@@ -3,7 +3,6 @@ package com.azid.auth.backend.AZ.Auth.service;
 import com.azid.auth.backend.AZ.Auth.dto.PlanDetailsDto;
 import com.azid.auth.backend.AZ.Auth.dto.PlanRequestDto;
 import com.azid.auth.backend.AZ.Auth.dto.PlanResponseDto;
-import com.azid.auth.backend.AZ.Auth.exceptions.BadRequestException;
 import com.azid.auth.backend.AZ.Auth.exceptions.ResourceNotFoundException;
 import com.azid.auth.backend.AZ.Auth.mapper.PlanMapper;
 import com.azid.auth.backend.AZ.Auth.model.Plan;
@@ -12,7 +11,6 @@ import com.azid.auth.backend.AZ.Auth.model.enums.GenderEnum;
 import com.azid.auth.backend.AZ.Auth.repository.PlanRepository;
 import com.azid.auth.backend.AZ.Auth.repository.RuleSetRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -24,14 +22,15 @@ import java.util.List;
 @Service
 @Slf4j
 public class PlanService {
-    @Autowired
-    private RuleSetRepository ruleSetRepository;
+    private final RuleSetRepository ruleSetRepository;
+    private final PlanRepository planRepository;
+    private final PlanMapper planMapper;
 
-    @Autowired
-    private PlanRepository planRepository;
-
-    @Autowired
-    private PlanMapper planMapper;
+    public PlanService(RuleSetRepository ruleSetRepository, PlanRepository planRepository, PlanMapper planMapper) {
+        this.ruleSetRepository = ruleSetRepository;
+        this.planRepository = planRepository;
+        this.planMapper = planMapper;
+    }
 
     public Plan getPlan(Long id) {
         return planRepository.findById(id)
