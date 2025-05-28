@@ -162,7 +162,7 @@ public class ClaimController {
         return ResponseEntity.ok(apiResponseDto);
     }
 
-    @GetMapping("/download")
+    @PostMapping("/download")
     public ResponseEntity<byte[]> downloadFile(@RequestBody Map<String, String> request) {
 
         String keyName = request.get("keyName");
