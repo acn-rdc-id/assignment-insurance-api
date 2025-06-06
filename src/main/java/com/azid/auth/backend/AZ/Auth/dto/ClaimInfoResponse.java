@@ -11,6 +11,7 @@ import java.util.List;
 public class ClaimInfoResponse {
 
     private List<String> policyId;
+    private List<String> policyNo;
     private List<ClaimPolicyDocument> claimPolicyDocument;
 
     @Data
