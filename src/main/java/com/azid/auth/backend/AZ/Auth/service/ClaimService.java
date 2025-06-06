@@ -54,6 +54,7 @@ public class ClaimService {
                     ClaimListResponseDto dto = new ClaimListResponseDto();
                     dto.setClaimId(claim.getClaimId());
                     dto.setPolicyId(claim.getPolicy() != null ? claim.getPolicy().getId() : null);
+                    dto.setPolicyNo(claim.getPolicy() != null ? claim.getPolicy().getPolicyNo() : null);
                     dto.setClaimDate(claim.getClaim_date());
                     dto.setClaimStatus(claim.getClaimStatus());
 
