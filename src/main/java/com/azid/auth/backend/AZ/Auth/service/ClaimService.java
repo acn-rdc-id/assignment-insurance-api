@@ -194,8 +194,10 @@ public class ClaimService {
                List<Policy> policy = policyRepository.findByUserId(String.valueOf(userId));
 
                List<String> policyIds = new ArrayList<>();
+               List<String> policyNos = new ArrayList<>();
                for (Policy p : policy) {
                    policyIds.add(String.valueOf(p.getId()));
+                   policyNos.add(p.getPolicyNo());
                }
                log.info("List of policy IDs: {}", policyIds);
 
@@ -221,6 +223,7 @@ public class ClaimService {
 
                ClaimInfoResponse response = new ClaimInfoResponse();
                response.setPolicyId(policyIds);
+               response.setPolicyNo(policyNos);
                response.setClaimPolicyDocument(new ArrayList<>(claimMap.values()));
                return response;
            } else {
@@ -230,10 +233,7 @@ public class ClaimService {
            log.error("Error fetching claim info: {}", e.getMessage());
            throw new RuntimeException("Error fetching claim info: " + e.getMessage());
        }
-
-
     }
-
 
     public ClaimType getClaimTypeById(Long claimTypeId) {
         return claimTypeRepository.findById(claimTypeId).orElse(null);
