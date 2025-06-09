@@ -24,6 +24,7 @@ public class QuotationApplicationResponseDto {
     public String email;
     public String title;
     public Date dateOfBirth;
+    public Integer age;
     public boolean isSmoker;
     public Integer cigarettesNo;
     public String occupation;
