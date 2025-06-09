@@ -23,6 +23,7 @@ public class QuotationApplicationResponseDto {
     public String phoneNo;
     public String email;
     public String title;
+    public Integer age;
     public Date dateOfBirth;
     public boolean isSmoker;
     public Integer cigarettesNo;

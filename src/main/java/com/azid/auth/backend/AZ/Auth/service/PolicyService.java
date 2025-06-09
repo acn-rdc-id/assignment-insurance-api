@@ -83,6 +83,7 @@ public class PolicyService {
 
         QuotationApplicationResponseDto applicationResponseDto = quotationApplicationMapper.toResponseDto(quotationApplication);
         log.info("[constructPolicyResponseDto] applicationResponseDto: {}", applicationResponseDto);
+        applicationResponseDto.setAge(quotationApplication.getAge());
         applicationResponseDto.setPlanResponseDto(planInfoDto);
         policyResponseDto.setApplicationResponseDto(applicationResponseDto);
 
@@ -128,6 +129,7 @@ public class PolicyService {
             log.info("[createApplication] Application saved successfully ID: {}", savedApplication.getId());
 
             QuotationApplicationResponseDto responseDto = quotationApplicationMapper.toResponseDto(savedApplication);
+            responseDto.setAge(application.getAge());
             responseDto.setPlanResponseDto(planInfoDto);
             responseDto.setId(savedApplication.getId());
 
