@@ -193,13 +193,15 @@ public class ClaimService {
                //Get policy IDs
                List<Policy> policy = policyRepository.findByUserId(String.valueOf(userId));
 
-               List<String> policyIds = new ArrayList<>();
-               List<String> policyNos = new ArrayList<>();
+               List<Map<String,String>> policyInfo = new ArrayList<>();
                for (Policy p : policy) {
-                   policyIds.add(String.valueOf(p.getId()));
-                   policyNos.add(p.getPolicyNo());
+
+                   Map<String, String> policyMap = new HashMap<>();
+                   policyMap.put("policyId",String.valueOf(p.getId()) );
+                   policyMap.put("policyNo", p.getPolicyNo());
+                   policyInfo.add(policyMap);
                }
-               log.info("List of policy IDs: {}", policyIds);
+               log.info("List of policy info: {}", policyInfo);
 
                // Get claim type & required documents
                List<Object[]> rows = claimTypeRepository.getClaimTypesWithDocuments();
@@ -222,8 +224,7 @@ public class ClaimService {
                }
 
                ClaimInfoResponse response = new ClaimInfoResponse();
-               response.setPolicyId(policyIds);
-               response.setPolicyNo(policyNos);
+               response.setPolicyInfo(policyInfo);
                response.setClaimPolicyDocument(new ArrayList<>(claimMap.values()));
                return response;
            } else {
